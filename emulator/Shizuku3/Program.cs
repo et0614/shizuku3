@@ -11,6 +11,11 @@ namespace Shizuku3
     static void Main(string[] args)
     {
       //既定はBACnetサーバ（本番モード）。引数testで開発用テストを実行
+      if (0 < args.Length && args[0] == "bench")
+      {
+        RunBenchmark();
+        return;
+      }
       if (args.Length == 0 || args[0] != "test")
       {
         RunServer();
@@ -29,6 +34,31 @@ namespace Shizuku3
       Console.WriteLine();
       RunTimeManagementTest();
     }
+
+    #region ベンチマーク（BACnet・ペーシングなしの素の計算速度）
+
+    /// <summary>エミュレータ本体を全速力で1日分計算し、所要時間を表示する</summary>
+    static void RunBenchmark()
+    {
+      double timeStep = Settings.Instance.TimeStep;
+      Console.WriteLine($"Benchmark: time step = {timeStep} s");
+      var sw = System.Diagnostics.Stopwatch.StartNew();
+      Shizuku3Emulator emu = new Shizuku3Emulator(timeStep,
+        Settings.Instance.SimulationStartDate, Settings.Instance.WeatherSeed,
+        Settings.Instance.OccupantSeed, Settings.Instance.WaterTempSeed);
+      Console.WriteLine($"Construction (incl. preconditioning): {sw.Elapsed.TotalSeconds:F1} s");
+
+      emu.AHU.WaterValvePosition = 0.6; //適当な運転状態で計算させる
+      int steps = (int)(86400 / timeStep);
+      sw.Restart();
+      for (int i = 0; i < steps; i++) emu.Step();
+      sw.Stop();
+      Console.WriteLine($"1 simulated day ({steps} steps): {sw.Elapsed.TotalSeconds:F2} s " +
+        $"({sw.Elapsed.TotalMilliseconds / steps:F2} ms/step, " +
+        $"{86400 / sw.Elapsed.TotalSeconds:F0}x realtime)");
+    }
+
+    #endregion
 
     #region 本番モード（BACnetサーバ）
 

@@ -1,17 +1,17 @@
-# Shizuku3エミュレータの学生向けクライアントライブラリ
+# Python client library for the Shizuku3 building emulator.
 #
-# BACnet(bacpypes3)の詳細を隠蔽し、同期的な read/write/step だけで
-# エミュレータを操作できるようにするラッパー。
+# Hides the BACnet (bacpypes3) details behind a small synchronous API:
 #
-# 使用例:
 #   from shizuku3client import Shizuku3Client
 #   emu = Shizuku3Client()
-#   print(emu.read("室温"))
-#   emu.write("弁開度", 0.6)
-#   emu.step(minutes=5)       # シミュレーションを5分進めて停止する
-#   emu.close()
+#   emu.write("WaterValvePosition", 0.6)
+#   emu.step(minutes=5)          # advance 5 minutes and pause (Gym-style)
+#   print(emu.read("RoomTemperature"))
+#
+# Japanese point names (e.g. "室温") are accepted as aliases.
 import asyncio
 import threading
+import time
 from datetime import datetime, timedelta
 
 from bacpypes3.app import Application
@@ -19,82 +19,85 @@ from bacpypes3.argparse import SimpleArgumentParser
 from bacpypes3.pdu import Address
 from bacpypes3.primitivedata import ObjectIdentifier
 
-# ポイント表: 名称 → (オブジェクト種別, インスタンス番号, 書込可)
-# 日本語名と英語名の両方を受け付ける
+# Point table: name -> (object type, instance, writable)
 _POINTS = {
-    # 操作量
-    "弁開度":        ("analog-value", 101, True),
-    "ファン回転数比": ("analog-value", 102, True),
-    "外気ダンパ開度": ("analog-value", 103, True),
-    "発停":          ("binary-value", 104, True),
-    "冷暖モード":     ("analog-value", 105, True),  # 0=自動,1=冷房,2=暖房
-    "全熱交バイパス": ("binary-value", 106, True),
-    "加湿有効":      ("binary-value", 107, True),
-    "加湿設定湿度":   ("analog-value", 108, True),
-    "加湿差動":      ("analog-value", 109, True),
-    # 計測量
-    "室温":          ("analog-value", 201, False),
-    "室相対湿度":     ("analog-value", 202, False),
-    "CO2":           ("analog-value", 203, False),
-    "PMV":           ("analog-value", 204, False),
-    "PPD":           ("analog-value", 205, False),
-    "在室人数":       ("analog-value", 206, False),
-    "給気温度":       ("analog-value", 211, False),
-    "給気相対湿度":   ("analog-value", 212, False),
-    "在室時間":       ("analog-value", 235, False),
-    "給気風量":       ("analog-value", 213, False),
-    "外気導入量":     ("analog-value", 214, False),
-    "冷温水入口温度": ("analog-value", 217, False),
-    "冷温水流量":     ("analog-value", 218, False),
-    "コイル熱量":     ("analog-value", 219, False),
-    "ファン電力":     ("analog-value", 220, False),
-    "外気温度":       ("analog-value", 221, False),
-    "外気相対湿度":   ("analog-value", 222, False),
-    "加湿作動":      ("binary-value", 224, False),
-    # KPI
-    "エネルギー積算":  ("analog-value", 231, False),
-    "PPD積算":       ("analog-value", 232, False),
-    "人数重みPPD積算": ("analog-value", 233, False),
-    "CO2超過時間":    ("analog-value", 234, False),
-    # シミュレーション管理
-    "加速度":        ("analog-value", 301, True),
-    "一時停止時刻":   ("characterstring-value", 302, True),
-    "現在時刻":       ("characterstring-value", 303, False),
-    "リセット":       ("binary-value", 304, True),
+    # Control inputs
+    "WaterValvePosition":  ("analog-value", 101, True),
+    "FanSpeedRatio":       ("analog-value", 102, True),
+    "OADamperPosition":    ("analog-value", 103, True),
+    "AHUOnOff":            ("binary-value", 104, True),
+    "OperationMode":       ("analog-value", 105, True),  # 0=auto, 1=cooling, 2=heating
+    "HEXBypass":           ("binary-value", 106, True),
+    "HumidifierEnabled":   ("binary-value", 107, True),
+    "HumiditySetPoint":    ("analog-value", 108, True),
+    "HumidityDeadband":    ("analog-value", 109, True),
+    # Measurements
+    "RoomTemperature":         ("analog-value", 201, False),
+    "RoomRelativeHumidity":    ("analog-value", 202, False),
+    "RoomCO2Level":            ("analog-value", 203, False),
+    "RoomPMV":                 ("analog-value", 204, False),
+    "RoomPPD":                 ("analog-value", 205, False),
+    "OccupantCount":           ("analog-value", 206, False),
+    "SupplyAirTemperature":    ("analog-value", 211, False),
+    "SupplyAirRelativeHumidity": ("analog-value", 212, False),
+    "SupplyAirFlowRate":       ("analog-value", 213, False),
+    "OutdoorAirFlowRate":      ("analog-value", 214, False),
+    "WaterInletTemperature":   ("analog-value", 217, False),
+    "WaterFlowRate":           ("analog-value", 218, False),
+    "CoilLoad":                ("analog-value", 219, False),
+    "FanElectricity":          ("analog-value", 220, False),
+    "OutdoorTemperature":      ("analog-value", 221, False),
+    "OutdoorRelativeHumidity": ("analog-value", 222, False),
+    "HumidifierStatus":        ("binary-value", 224, False),
+    # KPIs
+    "IntegratedEnergy":        ("analog-value", 231, False),
+    "IntegratedPPD":           ("analog-value", 232, False),
+    "IntegratedOccupantWeightedPPD": ("analog-value", 233, False),
+    "CO2ExcessTime":           ("analog-value", 234, False),
+    "OccupiedTime":            ("analog-value", 235, False),
+    # Simulation management
+    "AccelerationRate":        ("analog-value", 301, True),
+    "PauseAtDateTime":         ("characterstring-value", 302, True),
+    "CurrentDateTime":         ("characterstring-value", 303, False),
+    "Reinitialize":            ("binary-value", 304, True),
 }
 
+# Japanese aliases (kept for backward compatibility with the web GUI etc.)
 _ALIASES = {
-    "WaterValvePosition": "弁開度", "FanSpeedRatio": "ファン回転数比",
-    "OADamperPosition": "外気ダンパ開度", "AHUOnOff": "発停", "OperationMode": "冷暖モード",
-    "HEXBypass": "全熱交バイパス", "HumidifierEnabled": "加湿有効",
-    "HumiditySetPoint": "加湿設定湿度", "HumidityDeadband": "加湿差動",
-    "RoomTemperature": "室温", "RoomRelativeHumidity": "室相対湿度", "RoomCO2Level": "CO2",
-    "RoomPMV": "PMV", "RoomPPD": "PPD", "OccupantCount": "在室人数",
-    "SupplyAirTemperature": "給気温度", "SupplyAirFlowRate": "給気風量",
-    "OutdoorAirFlowRate": "外気導入量", "WaterInletTemperature": "冷温水入口温度",
-    "WaterFlowRate": "冷温水流量", "CoilLoad": "コイル熱量", "FanElectricity": "ファン電力",
-    "OutdoorTemperature": "外気温度", "OutdoorRelativeHumidity": "外気相対湿度",
-    "HumidifierStatus": "加湿作動", "IntegratedEnergy": "エネルギー積算",
-    "IntegratedPPD": "PPD積算", "IntegratedOccupantWeightedPPD": "人数重みPPD積算",
-    "CO2ExcessTime": "CO2超過時間", "AccelerationRate": "加速度",
-    "PauseAtDateTime": "一時停止時刻", "CurrentDateTime": "現在時刻", "Reinitialize": "リセット",
+    "弁開度": "WaterValvePosition", "ファン回転数比": "FanSpeedRatio",
+    "外気ダンパ開度": "OADamperPosition", "発停": "AHUOnOff", "冷暖モード": "OperationMode",
+    "全熱交バイパス": "HEXBypass", "加湿有効": "HumidifierEnabled",
+    "加湿設定湿度": "HumiditySetPoint", "加湿差動": "HumidityDeadband",
+    "室温": "RoomTemperature", "室相対湿度": "RoomRelativeHumidity", "CO2": "RoomCO2Level",
+    "PMV": "RoomPMV", "PPD": "RoomPPD", "在室人数": "OccupantCount",
+    "給気温度": "SupplyAirTemperature", "給気相対湿度": "SupplyAirRelativeHumidity",
+    "給気風量": "SupplyAirFlowRate", "外気導入量": "OutdoorAirFlowRate",
+    "冷温水入口温度": "WaterInletTemperature", "冷温水流量": "WaterFlowRate",
+    "コイル熱量": "CoilLoad", "ファン電力": "FanElectricity",
+    "外気温度": "OutdoorTemperature", "外気相対湿度": "OutdoorRelativeHumidity",
+    "加湿作動": "HumidifierStatus", "エネルギー積算": "IntegratedEnergy",
+    "PPD積算": "IntegratedPPD", "人数重みPPD積算": "IntegratedOccupantWeightedPPD",
+    "CO2超過時間": "CO2ExcessTime", "在室時間": "OccupiedTime",
+    "加速度": "AccelerationRate", "一時停止時刻": "PauseAtDateTime",
+    "現在時刻": "CurrentDateTime", "リセット": "Reinitialize",
 }
 
 _TIME_FORMAT = "%Y/%m/%d %H:%M:%S"
 
 
 class Shizuku3Client:
-    """Shizuku3エミュレータへのBACnet接続を隠蔽した同期クライアント"""
+    """Synchronous client that hides the BACnet connection to the emulator."""
 
     def __init__(self, host="127.0.0.1", port=47809,
                  local_ip="127.0.0.1", local_port=47810, timeout=5.0):
         self._timeout = timeout
         self._device = Address(f"{host}:{port}")
+        self._sim_time = None  # cached simulation time (kept in sync by step()/reset())
         self._loop = asyncio.new_event_loop()
         self._thread = threading.Thread(target=self._loop.run_forever, daemon=True)
         self._thread.start()
-        #ローカルポートが使用中の場合は+1しながら最大10ポート試す
-        #（bacpypes3はバインド失敗を例外にせず内部リトライするため、事前に自前で空きを検査する）
+        # If the local port is taken, try the next ones (bacpypes3 retries a failed
+        # bind internally instead of raising, so probe availability ourselves).
         import socket as _socket
         for lp in range(local_port, local_port + 10):
             probe = _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM)
@@ -111,8 +114,8 @@ class Shizuku3Client:
             break
         else:
             raise RuntimeError(
-                f"ローカルポート{local_port}～{local_port + 9}がすべて使用中です。"
-                "他のクライアント（旧server.py等）が残っていないか確認してください")
+                f"Local ports {local_port}-{local_port + 9} are all in use. "
+                "Check for leftover client processes.")
 
     async def _setup(self, local_ip, local_port):
         args = SimpleArgumentParser().parse_args(
@@ -120,16 +123,16 @@ class Shizuku3Client:
              "--instance", "3999", "--name", "Shizuku3Client"])
         self._app = Application.from_args(args)
 
-    # ---- 基本操作 ----------------------------------------------------
+    # ---- basic operations -------------------------------------------
 
     def _resolve(self, name):
         name = _ALIASES.get(name, name)
         if name not in _POINTS:
-            raise KeyError(f"未知のポイント名: {name}")
+            raise KeyError(f"Unknown point name: {name}")
         return name, _POINTS[name]
 
     def read(self, name):
-        """ポイントの現在値を読む"""
+        """Read the present value of a point."""
         _, (otype, inst, _) = self._resolve(name)
         fut = asyncio.run_coroutine_threadsafe(
             self._app.read_property(self._device,
@@ -143,10 +146,10 @@ class Shizuku3Client:
         return float(val)
 
     def write(self, name, value):
-        """ポイントに値を書く"""
+        """Write a value to a point."""
         nm, (otype, inst, writable) = self._resolve(name)
         if not writable:
-            raise ValueError(f"{nm} は読み取り専用")
+            raise ValueError(f"{nm} is read-only")
         if otype == "binary-value":
             value = 1 if value else 0
         elif otype == "analog-value":
@@ -159,38 +162,114 @@ class Shizuku3Client:
             self._loop)
         fut.result(self._timeout)
 
-    # ---- 時間管理 ----------------------------------------------------
+    # ---- time management --------------------------------------------
 
     def current_time(self):
-        """現在のシミュレーション時刻を返す"""
-        return datetime.strptime(self.read("現在時刻"), _TIME_FORMAT)
+        """Return the current simulation time."""
+        self._sim_time = datetime.strptime(self.read("CurrentDateTime"), _TIME_FORMAT)
+        return self._sim_time
 
-    def step(self, minutes=5.0, acceleration=1200, timeout=60.0):
-        """シミュレーションを指定分数だけ進めて停止する（ステップ実行）"""
-        import time
-        pause_at = self.current_time() + timedelta(minutes=minutes)
-        self.write("一時停止時刻", pause_at.strftime(_TIME_FORMAT))
-        self.write("加速度", acceleration)
+    def step(self, minutes=5.0, acceleration=3600, timeout=60.0):
+        """Advance the simulation by the given minutes and pause (Gym-style step).
+
+        The simulation time is cached between calls to avoid an extra BACnet
+        round trip. If you change AccelerationRate or PauseAtDateTime yourself,
+        call current_time() once to refresh the cache.
+        """
+        start = self._sim_time if self._sim_time is not None else self.current_time()
+        pause_at = start + timedelta(minutes=minutes)
+        self.write("PauseAtDateTime", pause_at.strftime(_TIME_FORMAT))
+        self.write("AccelerationRate", acceleration)
+        # Sleep through the bulk of the wall-clock wait, then poll for the pause.
+        time.sleep(max(0.0, minutes * 60 / acceleration - 0.02))
         limit = time.time() + timeout
         while time.time() < limit:
-            if self.read("加速度") == 0:
-                return self.current_time()
-            time.sleep(0.05)
-        raise TimeoutError("指定時間内に一時停止しなかった")
+            if self.read("AccelerationRate") == 0:
+                self._sim_time = pause_at
+                return pause_at
+            time.sleep(0.02)
+        raise TimeoutError("The emulator did not pause within the timeout")
+
+    def step_batch(self, minutes=5.0, acceleration=3600, writes=None, reads=None,
+                   timeout=60.0):
+        """Fast variant of step(): performs the writes, advances the simulation
+        and reads the requested points in a single event-loop call, so the
+        cross-thread handoff cost is paid once instead of once per request.
+        Intended for RL wrappers and batch experiments; teaching examples
+        should prefer the explicit read()/write()/step() calls.
+
+        Returns (new_simulation_time, [values of `reads` in order])."""
+        start = self._sim_time if self._sim_time is not None else self.current_time()
+        pause_at = start + timedelta(minutes=minutes)
+        fut = asyncio.run_coroutine_threadsafe(
+            self._step_batch_async(pause_at, minutes * 60 / acceleration,
+                                   acceleration, writes or {}, reads or [], timeout),
+            self._loop)
+        values = fut.result(timeout + self._timeout)
+        self._sim_time = pause_at
+        return pause_at, values
+
+    async def _step_batch_async(self, pause_at, wait_s, acceleration, writes, reads, timeout):
+        async def wr(name, value):
+            _, (otype, inst, _) = self._resolve(name)
+            if otype == "binary-value":
+                value = 1 if value else 0
+            elif otype == "analog-value":
+                value = float(value)
+            else:
+                value = str(value)
+            await self._app.write_property(
+                self._device, ObjectIdentifier(f"{otype},{inst}"), "present-value", value)
+
+        async def rd(name):
+            _, (otype, inst, _) = self._resolve(name)
+            v = await self._app.read_property(
+                self._device, ObjectIdentifier(f"{otype},{inst}"), "present-value")
+            if otype == "binary-value":
+                return int(v) != 0
+            if otype == "characterstring-value":
+                return str(v)
+            return float(v)
+
+        for n, v in writes.items():
+            await wr(n, v)
+        await wr("PauseAtDateTime", pause_at.strftime(_TIME_FORMAT))
+        await wr("AccelerationRate", acceleration)
+        await asyncio.sleep(max(0.0, wait_s - 0.01))
+        deadline = self._loop.time() + timeout
+        while self._loop.time() < deadline:
+            if await rd("AccelerationRate") == 0:
+                return list(await asyncio.gather(*(rd(n) for n in reads)))
+            await asyncio.sleep(0.005)
+        raise TimeoutError("The emulator did not pause within the timeout")
 
     def run(self, acceleration=600):
-        """一時停止を解除して連続実行する（停止はstop()または一時停止時刻で）"""
+        """Run continuously (stop with stop() or by the pause-at time)."""
         far = self.current_time() + timedelta(days=365)
-        self.write("一時停止時刻", far.strftime(_TIME_FORMAT))
-        self.write("加速度", acceleration)
+        self.write("PauseAtDateTime", far.strftime(_TIME_FORMAT))
+        self.write("AccelerationRate", acceleration)
+        self._sim_time = None  # time is now advancing freely
 
     def stop(self):
-        """計算を一時停止する"""
-        self.write("加速度", 0)
+        """Pause the simulation."""
+        self.write("AccelerationRate", 0)
+        self._sim_time = None
 
-    def reset(self):
-        """setting.iniを再読込して初期状態に戻す（数秒かかる）"""
-        self.write("リセット", True)
+    def reset(self, timeout=90.0):
+        """Reload setting.ini, restart from the initial state and wait for
+        completion (takes ~10 s). Returns the simulation start time."""
+        self.write("Reinitialize", True)
+        limit = time.time() + timeout
+        while time.time() < limit:
+            try:
+                s = self.read("CurrentDateTime")
+                if s:  # empty while reinitializing; a time string means done
+                    self._sim_time = datetime.strptime(s, _TIME_FORMAT)
+                    return self._sim_time
+            except Exception:
+                pass
+            time.sleep(1)
+        raise TimeoutError("Reinitialization did not complete (check the emulator)")
 
     def close(self):
         self._loop.call_soon_threadsafe(self._app.close)
@@ -199,12 +278,13 @@ class Shizuku3Client:
 
 
 if __name__ == "__main__":
-    # 簡易動作確認（エミュレータを起動しておくこと）
+    # Minimal self-test (start the emulator first)
     emu = Shizuku3Client()
-    print("現在時刻:", emu.current_time())
-    print("室温[C]:", emu.read("室温"), "/ CO2[ppm]:", emu.read("CO2"))
-    emu.write("弁開度", 0.6)
-    t = emu.step(minutes=5, acceleration=600)
-    print("5分ステップ後:", t, "/ 室温[C]:", emu.read("室温"), "/ 弁開度:", emu.read("弁開度"))
+    print("Simulation time:", emu.current_time())
+    print("Room temp [C]:", emu.read("RoomTemperature"),
+          "/ CO2 [ppm]:", emu.read("RoomCO2Level"))
+    emu.write("WaterValvePosition", 0.6)
+    t = emu.step(minutes=5)
+    print("After 5 min step:", t, "/ Room temp [C]:", emu.read("RoomTemperature"))
     emu.close()
-    print("動作確認OK")
+    print("OK")

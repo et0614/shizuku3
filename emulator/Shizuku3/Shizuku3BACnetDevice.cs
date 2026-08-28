@@ -80,6 +80,8 @@ namespace Shizuku3
       addBinary(304, "Reinitialize", "Reinitialize (write active to reload setting.ini and restart)", false, true);
 
       storage.ChangeOfValue += onStorageChanged;
+      //一時停止到達を即時にポイントへ反映する（500ms周期の同期を待たせない）
+      svc.PauseReached += () => { writeAnalog(301, 0); writeString(303, svc.Emulator.CurrentDateTime.ToString("yyyy/MM/dd HH:mm:ss")); };
 
       syncTimer = new System.Timers.Timer(500);
       syncTimer.Elapsed += (o, e) => syncFromEmulator();
@@ -196,7 +198,13 @@ namespace Shizuku3
             else svc.PauseAtDateTime = null;
             break;
           case 304:
-            if (dv != 0) { svc.Reset(); writeBinary(304, false); }
+            if (dv != 0)
+            {
+              //リセット中はCurrentDateTimeを空にする（クライアントが完了を検知できるようにする）
+              writeString(303, "");
+              svc.Reset();
+              writeBinary(304, false);
+            }
             break;
         }
       }

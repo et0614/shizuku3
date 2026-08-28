@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace Shizuku3
 {
@@ -27,6 +27,9 @@ namespace Shizuku3
 
     /// <summary>状態読み書きの排他用オブジェクト</summary>
     public object LockObj { get; } = new object();
+
+    /// <summary>一時停止時刻に到達して自停止したときに発生する（BACnet層への即時反映用）</summary>
+    public event Action? PauseReached;
 
     private Thread? loopThread;
     private volatile bool running;
@@ -132,6 +135,7 @@ namespace Shizuku3
       if (PauseAtDateTime.HasValue && PauseAtDateTime.Value <= Emulator.CurrentDateTime)
       {
         AccelerationRate = 0;
+        PauseReached?.Invoke();
         return true;
       }
       return false;
@@ -141,3 +145,4 @@ namespace Shizuku3
 
   }
 }
+

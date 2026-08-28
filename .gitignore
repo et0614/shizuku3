@@ -5,7 +5,7 @@ obj/
 *.user
 
 # Python
-python/.venv/
+.venv/
 __pycache__/
 *.pyc
 
