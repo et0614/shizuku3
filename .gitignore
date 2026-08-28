@@ -13,3 +13,4 @@ __pycache__/
 *.log
 naturalTemp.csv
 heatLoadTest.csv
+*.egg-info/
