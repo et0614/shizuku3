@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace Shizuku3
 {
@@ -24,8 +24,9 @@ namespace Shizuku3
 
     //実行制御
     public uint AccelerationRate { get; private set; } = 60;
-    public double TimeStep { get; private set; } = 60;
+    public double TimeStep { get; private set; } = 1;
     public double ControlInterval { get; private set; } = 300;
+    public double ValveTravelTime { get; private set; } = 90;
     public DateTime SimulationStartDate { get; private set; } = new DateTime(2026, 8, 5);
     public int SimulationDays { get; private set; } = 1;
     public double DataOutputSpan { get; private set; } = 1;
@@ -88,6 +89,7 @@ namespace Shizuku3
       AccelerationRate = getUInt(kv, "ACCELERATION_RATE", AccelerationRate);
       TimeStep = Math.Max(1, Math.Min(60, getDouble(kv, "TIME_STEP", TimeStep)));
       ControlInterval = getDouble(kv, "CONTROL_INTERVAL", ControlInterval);
+      ValveTravelTime = getDouble(kv, "VALVE_TRAVEL_TIME", ValveTravelTime);
       if (kv.TryGetValue("SIMULATION_START_DATE", out string? sd) &&
         DateTime.TryParse(sd, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt))
         SimulationStartDate = dt;
@@ -133,3 +135,5 @@ namespace Shizuku3
 
   }
 }
+
+

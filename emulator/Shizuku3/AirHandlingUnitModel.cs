@@ -1,4 +1,4 @@
-using Popolo.Core.HVAC.AirSide;
+﻿using Popolo.Core.HVAC.AirSide;
 using Popolo.Core.HVAC.FluidCircuit;
 using Popolo.Core.HVAC.HeatExchanger;
 using Popolo.Core.Physics;
@@ -92,6 +92,12 @@ namespace Shizuku3
 
     /// <summary>給気温度[C]</summary>
     public double SupplyAirTemperature { get; private set; } = 22;
+
+    /// <summary>計算時間刻み[sec]（弁アクチュエータのレート制限に使用。エミュレータが設定する）</summary>
+    public double TimeStep { get; set; } = 1;
+
+    /// <summary>弁の実開度[-]（指令開度WaterValvePositionへ一定速度で移動する）</summary>
+    public double ActualValvePosition { get; private set; } = 0;
 
     /// <summary>給気絶対湿度[kg/kg]</summary>
     public double SupplyAirHumidityRatio { get; private set; } = 0.0105;
@@ -246,9 +252,20 @@ namespace Shizuku3
       //給気ファン（押込形: コイル・加湿器の上流に位置し、ファン発熱は混合空気に加わる）
       mixTemp += sFanElec / (mSA * cpAir);
 
+      //弁アクチュエータ: 一定速度で指令開度へ移動（全ストロークVALVE_TRAVEL_TIME秒のレート制限）
+      double travel = Settings.Instance.ValveTravelTime;
+      double target = Math.Max(0, Math.Min(1, WaterValvePosition));
+      if (travel <= 0) ActualValvePosition = target;
+      else
+      {
+        double maxChange = TimeStep / travel;
+        double change = target - ActualValvePosition;
+        ActualValvePosition += Math.Abs(change) <= maxChange ? change : Math.Sign(change) * maxChange;
+      }
+
       //冷温水コイル（弁開度→水量: イコールパーセント特性・定差圧・全閉可能）**
       double designWater = (IsCoolingMode ? DESIGN_CHW_FLOW : DESIGN_HW_FLOW) / 60; //[kg/s]
-      double lift = Math.Max(0, Math.Min(1, WaterValvePosition));
+      double lift = ActualValvePosition;
       double minRate = 1 / VALVE_RANGE_ABILITY;
       double flowRate = (Math.Pow(VALVE_RANGE_ABILITY, lift - 1) - minRate) / (1 - minRate); //開度0で流量0に正規化
       double mWater = designWater * Math.Max(0, flowRate);
@@ -296,3 +313,4 @@ namespace Shizuku3
 
   }
 }
+

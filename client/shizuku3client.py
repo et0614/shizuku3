@@ -84,6 +84,10 @@ _ALIASES = {
 
 _TIME_FORMAT = "%Y/%m/%d %H:%M:%S"
 
+# Acceleration value that disables real-time pacing: the emulator computes
+# at full speed until the pause-at time (use for batch runs and RL).
+FULL_SPEED = 1_000_000
+
 
 class Shizuku3Client:
     """Synchronous client that hides the BACnet connection to the emulator."""
@@ -187,7 +191,7 @@ class Shizuku3Client:
             if self.read("AccelerationRate") == 0:
                 self._sim_time = pause_at
                 return pause_at
-            time.sleep(0.02)
+            time.sleep(0.002)
         raise TimeoutError("The emulator did not pause within the timeout")
 
     def step_batch(self, minutes=5.0, acceleration=3600, writes=None, reads=None,

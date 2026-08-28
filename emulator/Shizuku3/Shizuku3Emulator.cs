@@ -1,4 +1,4 @@
-using Popolo.Core.Building;
+﻿using Popolo.Core.Building;
 using Popolo.Core.Climate;
 using Popolo.Core.Numerics;
 using Popolo.Core.Physics;
@@ -105,6 +105,7 @@ namespace Shizuku3
 
       Load = new HeatLoadModel(timeStep, occupantSeed);
       AHU = new AirHandlingUnitModel();
+      AHU.TimeStep = timeStep;
       sun = new Sun(Sun.City.Tokyo);
       waterRnd = new NormalRandom(waterTempSeed);
       ChilledWaterTemperature = CHW_MEAN;
@@ -269,3 +270,4 @@ namespace Shizuku3
 
   }
 }
+

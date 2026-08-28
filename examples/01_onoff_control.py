@@ -25,12 +25,12 @@
 # =====================================================================
 import matplotlib.pyplot as plt
 
-from shizuku3client import Shizuku3Client
+from shizuku3client import FULL_SPEED, Shizuku3Client
 
 SETPOINT = 26.0        # room temperature setpoint [C]
 CONTROL_INTERVAL = 5   # control interval [min] (we can only act this often)
 SIMULATE_HOURS = 24    # simulated period [h]
-ACCELERATION = 3600    # simulation speed (3600x -> 5 sim-minutes per 0.08 s)
+ACCELERATION = FULL_SPEED  # no real-time pacing: we only look at the final chart
 
 
 def main():

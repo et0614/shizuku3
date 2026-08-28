@@ -80,8 +80,9 @@ namespace Shizuku3
       addBinary(304, "Reinitialize", "Reinitialize (write active to reload setting.ini and restart)", false, true);
 
       storage.ChangeOfValue += onStorageChanged;
-      //一時停止到達を即時にポイントへ反映する（500ms周期の同期を待たせない）
-      svc.PauseReached += () => { writeAnalog(301, 0); writeString(303, svc.Emulator.CurrentDateTime.ToString("yyyy/MM/dd HH:mm:ss")); };
+      //一時停止到達時は全ポイントを即時同期する（500ms周期の同期を待つと、
+      //全速モードでは停止直後の読み取りが古い計測値になり制御を誤らせる）
+      svc.PauseReached += syncFromEmulator;
 
       syncTimer = new System.Timers.Timer(500);
       syncTimer.Elapsed += (o, e) => syncFromEmulator();

@@ -20,7 +20,13 @@ namespace Shizuku3
     public Shizuku3Emulator Emulator { get; private set; }
 
     /// <summary>加速度（実時間1秒あたりのシミュレーション秒数。0=停止）</summary>
-    public uint AccelerationRate { get; set; }
+    /// <remarks>正値は計算刻み以上にクランプする（1実秒に最低1ステップ=画面更新を保証）</remarks>
+    public uint AccelerationRate
+    {
+      get { return accelerationRate; }
+      set { accelerationRate = value == 0 ? 0 : Math.Max(value, (uint)Math.Ceiling(Settings.Instance.TimeStep)); }
+    }
+    private uint accelerationRate;
 
     /// <summary>一時停止時刻（この時刻に達すると加速度が0になる）</summary>
     public DateTime? PauseAtDateTime { get; set; }
@@ -110,10 +116,26 @@ namespace Shizuku3
           continue;
         }
 
+        //全速モード: 加速度が100万以上ならペーシングを省略し一時停止時刻まで一気に計算する
+        //（ロックは1000ステップ毎に解放し、外部からの書込みへの応答性を保つ）
+        if (1000000 <= acc)
+        {
+          lock (LockObj)
+          {
+            for (int i = 0; i < 1000 && running && AccelerationRate != 0; i++)
+            {
+              if (checkPause()) break;
+              Emulator.Step();
+            }
+          }
+          sWatch.Restart();
+          continue;
+        }
+
         owedSimSeconds += sWatch.Elapsed.TotalSeconds * acc;
         sWatch.Restart();
-        //計算が追いつかない場合の暴走防止（未消化分は最大10ステップまで持ち越す）
-        owedSimSeconds = Math.Min(owedSimSeconds, 10 * timeStep);
+        //計算が追いつかない場合の暴走防止（未消化分は実時間1秒分の進行量まで持ち越す）
+        owedSimSeconds = Math.Min(owedSimSeconds, Math.Max(10 * timeStep, acc));
 
         while (running && timeStep <= owedSimSeconds && AccelerationRate != 0)
         {
@@ -145,4 +167,5 @@ namespace Shizuku3
 
   }
 }
+
 
