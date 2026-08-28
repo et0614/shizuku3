@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shizuku3client"
+version = "0.1.0"
+description = "Python client library for the Shizuku3 building emulator (BACnet)"
+requires-python = ">=3.10"
+dependencies = ["bacpypes3"]
+
+[tool.setuptools]
+py-modules = ["shizuku3client"]

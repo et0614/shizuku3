@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1791.6 742.2">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #9575cd;
+      }
+
+      .cls-2 {
+        font-size: 28px;
+      }
+
+      .cls-2, .cls-3, .cls-4, .cls-5, .cls-6 {
+        fill: #fff;
+        font-family: ArialMT, Arial;
+      }
+
+      .cls-7 {
+        stroke: #4fc3f7;
+      }
+
+      .cls-7, .cls-8, .cls-9, .cls-10, .cls-11, .cls-12, .cls-13, .cls-14, .cls-15, .cls-16, .cls-17 {
+        fill: none;
+      }
+
+      .cls-7, .cls-9, .cls-10, .cls-11, .cls-13, .cls-14, .cls-15, .cls-16 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-7, .cls-9, .cls-11, .cls-13, .cls-15, .cls-16 {
+        stroke-width: 8px;
+      }
+
+      .cls-3 {
+        font-size: 48px;
+      }
+
+      .cls-8 {
+        stroke: #2962ff;
+      }
+
+      .cls-8, .cls-12, .cls-14, .cls-17 {
+        stroke-width: 6px;
+      }
+
+      .cls-8, .cls-12, .cls-17 {
+        stroke-linejoin: bevel;
+      }
+
+      .cls-9 {
+        stroke: #9575cd;
+      }
+
+      .cls-10 {
+        stroke-width: 5px;
+      }
+
+      .cls-10, .cls-12, .cls-14, .cls-17 {
+        stroke: #fff;
+      }
+
+      .cls-18 {
+        letter-spacing: -.06em;
+      }
+
+      .cls-11 {
+        stroke: #aab;
+      }
+
+      .cls-19 {
+        fill: #4caf50;
+      }
+
+      .cls-13 {
+        stroke: url(#_名称未設定グラデーション_29);
+      }
+
+      .cls-20 {
+        fill: #ffb74d;
+      }
+
+      .cls-21 {
+        letter-spacing: -.02em;
+      }
+
+      .cls-15 {
+        stroke: #ffb74d;
+      }
+
+      .cls-16 {
+        stroke: #4caf50;
+      }
+
+      .cls-4 {
+        font-size: 36px;
+      }
+
+      .cls-5 {
+        font-size: 32px;
+      }
+
+      .cls-6 {
+        font-size: 60px;
+      }
+
+      .cls-17 {
+        stroke-dasharray: 6.13 8.17;
+      }
+
+      .cls-22 {
+        fill: #4fc3f7;
+      }
+    </style>
+    <linearGradient id="_名称未設定グラデーション_29" data-name="名称未設定グラデーション 29" x1="453.49" y1="461.04" x2="453.49" y2="752.58" gradientTransform="translate(0 -130.72)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4caf50"/>
+      <stop offset="1" stop-color="#9575cd"/>
+    </linearGradient>
+  </defs>
+  <g id="background">
+    <rect class="cls-11" x="1253.4" y="126.54" width="300" height="611.66"/>
+    <rect class="cls-11" x="300.63" y="126.54" width="891.14" height="611.66"/>
+  </g>
+  <g id="Fixed">
+    <text class="cls-6" transform="translate(0 69.97)"><tspan x="0" y="0">Shizuku 3</tspan></text>
+    <text class="cls-3" transform="translate(1268.6079 173.5566)"><tspan x="0" y="0">Room</tspan></text>
+    <text class="cls-3" transform="translate(315.84 173.56)"><tspan x="0" y="0">Air handling unit</tspan></text>
+    <text class="cls-2" transform="translate(350.37 392.51)"><tspan x="0" y="0">O</tspan><tspan class="cls-18" x="21.78" y="0">A</tspan></text>
+    <text class="cls-2" transform="translate(388.53 485.17)"><tspan x="0" y="0">R</tspan><tspan class="cls-18" x="20.22" y="0">A</tspan></text>
+    <text class="cls-2" transform="translate(348.3 578.97)"><tspan x="0" y="0">E</tspan><tspan class="cls-18" x="18.68" y="0">A</tspan></text>
+    <text class="cls-3" transform="translate(31.04 243.93)"><tspan x="0" y="0">Outdoor</tspan></text>
+    <g>
+      <line class="cls-16" x1="229.49" y1="330.44" x2="497.01" y2="330.44"/>
+      <polygon class="cls-19" points="491.18 350.38 525.71 330.44 491.18 310.49 491.18 350.38"/>
+    </g>
+    <g>
+      <line class="cls-15" x1="922.97" y1="621.87" x2="653.39" y2="621.87"/>
+      <polygon class="cls-20" points="659.22 601.92 624.69 621.86 659.22 641.81 659.22 601.92"/>
+    </g>
+    <g>
+      <line class="cls-9" x1="525.71" y1="621.75" x2="258.19" y2="621.75"/>
+      <polygon class="cls-1" points="264.02 601.81 229.49 621.75 264.02 641.7 264.02 601.81"/>
+    </g>
+    <circle class="cls-10" cx="367.74" cy="330.21" r="17.37"/>
+    <line class="cls-10" x1="385.11" y1="297.75" x2="350.37" y2="362.9"/>
+    <circle class="cls-10" cx="367.74" cy="621.75" r="17.37"/>
+    <line class="cls-10" x1="385.11" y1="589.3" x2="350.37" y2="654.44"/>
+    <line class="cls-13" x1="453.49" y1="330.32" x2="453.49" y2="621.87"/>
+    <rect class="cls-14" x="533.94" y="253.41" width="79.54" height="454.4"/>
+    <polygon class="cls-12" points="573.71 252.94 533.94 478.06 573.71 707.81 613.49 480.37 573.71 252.94"/>
+    <g>
+      <circle class="cls-12" cx="712.28" cy="330.32" r="57.14"/>
+      <circle class="cls-12" cx="712.28" cy="330.32" r="28.57"/>
+      <polyline class="cls-12" points="712.28 273.18 786.11 273.18 786.11 330.32 769.42 330.32"/>
+    </g>
+    <g>
+      <circle class="cls-12" cx="1004.34" cy="650.67" r="57.14"/>
+      <circle class="cls-12" cx="1004.34" cy="650.67" r="28.57"/>
+      <polyline class="cls-12" points="1004.34 593.52 930.51 593.52 930.51 650.67 947.2 650.67"/>
+    </g>
+    <line class="cls-16" x1="619.89" y1="330.32" x2="712.28" y2="330.32"/>
+    <line class="cls-16" x1="792.69" y1="301.75" x2="817.37" y2="301.75"/>
+    <line class="cls-7" x1="903.77" y1="301.75" x2="976.46" y2="301.75"/>
+    <g>
+      <line class="cls-7" x1="1028.83" y1="301.75" x2="1277.24" y2="301.75"/>
+      <polygon class="cls-22" points="1271.4 321.7 1305.94 301.75 1271.4 281.81 1271.4 321.7"/>
+    </g>
+    <rect class="cls-12" x="825.91" y="249.75" width="70.4" height="158.17"/>
+    <rect class="cls-12" x="985.04" y="249.75" width="35.2" height="158.17"/>
+    <line class="cls-12" x1="826.83" y1="249.75" x2="895.4" y2="407.92"/>
+    <circle class="cls-10" cx="452.66" cy="475.98" r="17.37"/>
+    <line class="cls-10" x1="470.03" y1="443.52" x2="435.29" y2="508.67"/>
+    <g>
+      <line class="cls-12" x1="1002.64" y1="273.18" x2="1002.64" y2="276.18"/>
+      <line class="cls-17" x1="1002.64" y1="284.35" x2="1002.64" y2="380.38"/>
+      <line class="cls-12" x1="1002.64" y1="384.47" x2="1002.64" y2="387.47"/>
+    </g>
+    <line class="cls-12" x1="861.11" y1="224.6" x2="861.11" y2="249.75"/>
+    <line class="cls-8" x1="880.16" y1="224.6" x2="913.6" y2="224.6"/>
+    <line class="cls-8" x1="842.06" y1="224.6" x2="815.09" y2="224.6"/>
+    <line class="cls-15" x1="1291.89" y1="650.67" x2="1004.34" y2="650.67"/>
+    <g>
+      <polygon class="cls-12" points="861.79 224.6 842.06 213.21 842.06 235.99 861.79 224.6"/>
+      <polygon class="cls-12" points="860.44 224.6 880.16 235.99 880.16 213.21 860.44 224.6"/>
+    </g>
+    <text class="cls-5" transform="translate(165.08 315.09)"><tspan x="0" y="0">°C</tspan></text>
+    <text class="cls-5" transform="translate(172.53 367.65)"><tspan x="0" y="0">%</tspan></text>
+    <text class="cls-5" transform="translate(409.1 245.68)"><tspan x="0" y="0">%</tspan></text>
+    <text class="cls-5" transform="translate(409.1 288.81)"><tspan x="0" y="0">CMH</tspan></text>
+    <text class="cls-5" transform="translate(729.43 425.16)"><tspan x="0" y="0">kW</tspan></text>
+    <text class="cls-5" transform="translate(720.47 256.49)"><tspan x="0" y="0">%</tspan></text>
+    <text class="cls-5" transform="translate(813.29 165.84)"><tspan x="0" y="0">%</tspan></text>
+    <text class="cls-5" transform="translate(921.38 165.84)"><tspan x="0" y="0">L/min</tspan></text>
+    <text class="cls-5" transform="translate(886.17 205.77)"><tspan x="0" y="0">°C</tspan></text>
+    <text class="cls-5" transform="translate(1130.2163 348.1042)"><tspan x="0" y="0">°C</tspan></text>
+    <text class="cls-5" transform="translate(1137.6694 399.1881)"><tspan x="0" y="0">%</tspan></text>
+    <text class="cls-5" transform="translate(1418.3688 347.9076)"><tspan x="0" y="0">°C</tspan></text>
+    <text class="cls-5" transform="translate(1418.3688 402.4968)"><tspan x="0" y="0">%</tspan></text>
+    <text class="cls-5" transform="translate(1418.3691 457.0861)"><tspan x="0" y="0">PPM</tspan></text>
+    <text class="cls-5" transform="translate(1418.3691 511.6749)"><tspan x="0" y="0">persons</tspan></text>
+    <text class="cls-5" transform="translate(1418.3691 566.2646)"><tspan x="0" y="0">PMV</tspan></text>
+    <text class="cls-5" transform="translate(1093.2475 450.2726)"><tspan x="0" y="0">CMH</tspan></text>
+    <text class="cls-5" transform="translate(679.2 27.46)"><tspan x="0" y="0">Energy consumption</tspan></text>
+    <text class="cls-5" transform="translate(1068.8061 27.4609)"><tspan class="cls-21" x="0" y="0">A</tspan><tspan x="20.77" y="0">veraged PPD</tspan></text>
+    <text class="cls-5" transform="translate(1429.1266 27.4609)"><tspan x="0" y="0">CO2 excess</tspan></text>
+    <text class="cls-5" transform="translate(824.5 74.54)"><tspan x="0" y="0">kWh</tspan></text>
+    <text class="cls-5" transform="translate(1187.9123 74.5442)"><tspan x="0" y="0">%</tspan></text>
+    <text class="cls-5" transform="translate(1533.9099 74.5442)"><tspan x="0" y="0">h</tspan></text>
+  </g>
+  <g id="outdoor_temp">
+    <text class="cls-5" transform="translate(95.59 315.09)"><tspan x="0" y="0">33.2</tspan></text>
+  </g>
+  <g id="outdoor_rh">
+    <text class="cls-5" transform="translate(122.27 367.65)"><tspan x="0" y="0">58</tspan></text>
+  </g>
+  <g id="damper_pos">
+    <text class="cls-5" transform="translate(366.49 245.68)"><tspan x="0" y="0">58</tspan></text>
+  </g>
+  <g id="oa_flow">
+    <text class="cls-5" transform="translate(348.69 288.81)"><tspan x="0" y="0">500</tspan></text>
+  </g>
+  <g id="hex_state">
+    <text class="cls-5" transform="translate(632.43 508.83)"><tspan x="0" y="0">Enabled</tspan></text>
+  </g>
+  <g id="humid_state">
+    <text class="cls-5" transform="translate(978.26 233.92)"><tspan x="0" y="0">Enabled</tspan></text>
+  </g>
+  <g id="fan_kw">
+    <text class="cls-5" transform="translate(657.01 425.16)"><tspan x="0" y="0">10.0</tspan></text>
+  </g>
+  <g id="fan_ratio">
+    <text class="cls-5" transform="translate(659.85 256.49)"><tspan x="0" y="0">100</tspan></text>
+  </g>
+  <g id="valve_pos">
+    <text class="cls-5" transform="translate(752.04 165.84)"><tspan x="0" y="0">100</tspan></text>
+  </g>
+  <g id="water_flow">
+    <text class="cls-5" transform="translate(860.14 165.84)"><tspan x="0" y="0">100</tspan></text>
+  </g>
+  <g id="water_temp">
+    <text class="cls-5" transform="translate(829.53 206.95)"><tspan x="0" y="0">7.2</tspan></text>
+  </g>
+  <g id="sa_temp">
+    <text class="cls-5" transform="translate(1054.1576 348.7379)"><tspan x="0" y="0">12.0</tspan></text>
+  </g>
+  <g id="sa_rh">
+    <text class="cls-5" transform="translate(1080.8451 400.3635)"><tspan x="0" y="0">50</tspan></text>
+  </g>
+  <g id="sa_flow">
+    <text class="cls-5" transform="translate(1011.7086 451.448)"><tspan x="0" y="0">1000</tspan></text>
+  </g>
+  <g id="room_temp">
+    <text class="cls-5" transform="translate(1336.3319 347.9075)"><tspan x="0" y="0">25.6</tspan></text>
+  </g>
+  <g id="room_rh">
+    <text class="cls-5" transform="translate(1363.0194 402.4968)"><tspan x="0" y="0">50</tspan></text>
+  </g>
+  <g id="co2">
+    <text class="cls-5" transform="translate(1327.4256 457.0861)"><tspan x="0" y="0">1200</tspan></text>
+  </g>
+  <g id="occupants">
+    <text class="cls-5" transform="translate(1363.0195 511.6754)"><tspan x="0" y="0">20</tspan></text>
+  </g>
+  <g id="pmv">
+    <text class="cls-5" transform="translate(1335.4413 566.2646)"><tspan x="0" y="0">+0.2</tspan></text>
+  </g>
+  <g id="sim_date">
+    <text class="cls-4" transform="translate(379.94 34.74)"><tspan x="0" y="0">2026/08/05</tspan></text>
+  </g>
+  <g id="sim_time">
+    <text class="cls-4" transform="translate(399.96 74.81)"><tspan x="0" y="0">14:30:22</tspan></text>
+  </g>
+  <g id="energy">
+    <text class="cls-5" transform="translate(746.14 74.54)"><tspan x="0" y="0">1234</tspan></text>
+  </g>
+  <g id="ppd_ave">
+    <text class="cls-5" transform="translate(1145.7467 74.5442)"><tspan x="0" y="0">15</tspan></text>
+  </g>
+  <g id="co2_excess">
+    <text class="cls-5" transform="translate(1477.2381 75.7195)"><tspan x="0" y="0">0.2</tspan></text>
+  </g>
+</svg>

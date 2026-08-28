@@ -1,0 +1,7 @@
+pyproject.toml
+shizuku3client.py
+shizuku3client.egg-info/PKG-INFO
+shizuku3client.egg-info/SOURCES.txt
+shizuku3client.egg-info/dependency_links.txt
+shizuku3client.egg-info/requires.txt
+shizuku3client.egg-info/top_level.txt

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Shizuku3</title>
+<style>
+body{margin:0;background:#14181f;color:#dde;font-family:"Meiryo UI",Meiryo,Arial,sans-serif}
+#wrap{display:flex;align-items:flex-start;max-width:1920px;margin:0 auto;gap:8px}
+#svgbox{flex:1;min-width:0}
+#svgbox svg{width:100%;height:auto;display:block}
+#panel{flex:0 0 210px;margin-top:60px;background:#1c2230;border:1px solid #445;
+       border-radius:8px;padding:10px;font-size:14px}
+#panel label{display:block;margin-top:10px}
+#panel input[type=range]{width:100%}
+#panel select{background:#2a3550;color:#dde;border:1px solid #567}
+button{background:#2a3550;color:#dde;border:1px solid #567;border-radius:4px;
+       padding:6px 12px;margin:2px;cursor:pointer;font-size:14px}
+button:hover{background:#3a4a70}
+#langbtn{font-size:12px;padding:2px 8px}
+#status{max-width:1920px;margin:0 auto;padding:2px 12px;color:#ff7043;min-height:20px;font-size:13px}
+#charts{display:flex;gap:8px;padding:8px;background:#0e1116;max-width:1920px;margin:0 auto;box-sizing:border-box}
+.cbox{flex:1;position:relative;height:230px;background:#14181f;border:1px solid #2a3040}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="svgbox"></div>
+  <div id="panel">
+    <div style="text-align:right"><button id="langbtn">日本語</button></div>
+    <div><button id="play" data-i18n="play"></button><button id="stop" data-i18n="pause"></button></div>
+    <label><span data-i18n="acc"></span> ×<span id="accv">600</span></label>
+    <input type="range" id="acc" min="0" max="3.5563" step="0.01" value="2.78">
+    <label><span data-i18n="valve"></span> <span id="valvev">0.00</span></label>
+    <input type="range" id="valve" min="0" max="1" step="0.01" value="0">
+    <label><span data-i18n="fan"></span> <span id="fanv">1.00</span></label>
+    <input type="range" id="fan" min="0.4" max="1" step="0.01" value="1">
+    <label><span data-i18n="dmp"></span> <span id="dmpv">1.00</span></label>
+    <input type="range" id="dmp" min="0" max="1" step="0.01" value="1">
+    <label><span data-i18n="mode"></span>
+      <select id="mode"><option value="0"></option><option value="1"></option><option value="2"></option></select>
+    </label>
+    <label><input type="checkbox" id="onoff" checked> <span data-i18n="on"></span></label>
+    <label><input type="checkbox" id="bypass"> <span data-i18n="bypass"></span></label>
+    <label><input type="checkbox" id="humid" checked> <span data-i18n="humid"></span></label>
+    <label><span data-i18n="humidsp"></span> <span id="humidspv">40</span> %</label>
+    <input type="range" id="humidsp" min="20" max="60" step="1" value="40">
+    <label><span data-i18n="humiddb"></span> ±<span id="humiddbv">10</span> %</label>
+    <input type="range" id="humiddb" min="2" max="20" step="1" value="10">
+    <div style="margin-top:10px"><button id="reset" data-i18n="reset"></button></div>
+  </div>
+</div>
+<div id="status"></div>
+<div id="charts">
+  <div class="cbox"><canvas id="cTemp"></canvas></div>
+  <div class="cbox"><canvas id="cCO2"></canvas></div>
+  <div class="cbox"><canvas id="cRH"></canvas></div>
+</div>
+<script src="/web/chart.umd.js"></script>
+<script src="/web/app.js"></script>
+</body>
+</html>
