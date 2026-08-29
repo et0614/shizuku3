@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Popolo.Core.Building;
 using Popolo.Core.Climate;
 
@@ -86,6 +86,13 @@ namespace Shizuku3
         lock (svc.LockObj)
         {
           Shizuku3Emulator emu = svc.Emulator;
+          //リセットで時刻が巻き戻った場合は基準を取り直す
+          if (emu.CurrentDateTime < lastLogged)
+          {
+            lastLogged = emu.CurrentDateTime;
+            lastKPIDate = emu.CurrentDateTime.Date;
+            dayEnergy = dayPPD = dayOccPPD = dayCO2Excess = 0;
+          }
           if (emu.CurrentDateTime < lastLogged.AddHours(1)) return;
           lastLogged = emu.CurrentDateTime;
           Console.WriteLine($"{emu.CurrentDateTime:MM/dd HH:mm} Outdoor {emu.OutdoorTemperature,5:F1}C, " +
@@ -471,3 +478,4 @@ namespace Shizuku3
 
   }
 }
+

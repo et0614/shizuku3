@@ -27,6 +27,7 @@ namespace Shizuku3
     public double TimeStep { get; private set; } = 1;
     public double ControlInterval { get; private set; } = 300;
     public double ValveTravelTime { get; private set; } = 90;
+    public bool LogBACnetWrites { get; private set; } = true;
     public DateTime SimulationStartDate { get; private set; } = new DateTime(2026, 8, 5);
     public int SimulationDays { get; private set; } = 1;
     public double DataOutputSpan { get; private set; } = 1;
@@ -39,6 +40,7 @@ namespace Shizuku3
     //エネルギー・快適性評価
     public double SystemCOPCooling { get; private set; } = 3.5;
     public double SystemCOPHeating { get; private set; } = 0.85;
+    public double PumpWTF { get; private set; } = 40;
     public double PMVBias { get; private set; } = 0.0;
     public bool PPDOccupantWeighted { get; private set; } = false;
 
@@ -90,6 +92,7 @@ namespace Shizuku3
       TimeStep = Math.Max(1, Math.Min(60, getDouble(kv, "TIME_STEP", TimeStep)));
       ControlInterval = getDouble(kv, "CONTROL_INTERVAL", ControlInterval);
       ValveTravelTime = getDouble(kv, "VALVE_TRAVEL_TIME", ValveTravelTime);
+      LogBACnetWrites = getString(kv, "LOG_BACNET_WRITES", "true").ToLower() != "false";
       if (kv.TryGetValue("SIMULATION_START_DATE", out string? sd) &&
         DateTime.TryParse(sd, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt))
         SimulationStartDate = dt;
@@ -100,6 +103,7 @@ namespace Shizuku3
       UdpPort = (int)getUInt(kv, "UDP_PORT", (uint)UdpPort);
       SystemCOPCooling = getDouble(kv, "SYSTEM_COP_COOLING", SystemCOPCooling);
       SystemCOPHeating = getDouble(kv, "SYSTEM_COP_HEATING", SystemCOPHeating);
+      PumpWTF = Math.Max(1, getDouble(kv, "PUMP_WTF", PumpWTF));
       PMVBias = getDouble(kv, "PMV_BIAS", PMVBias);
       PPDOccupantWeighted = getString(kv, "PPD_OCCUPANT_WEIGHTED", "false").ToLower() == "true";
       WeatherSeed = getUInt(kv, "WEATHER_SEED", WeatherSeed);
@@ -135,5 +139,6 @@ namespace Shizuku3
 
   }
 }
+
 
 

@@ -9,10 +9,9 @@
 # The crucial design decision is the REWARD FUNCTION -- it plays the
 # same role as the grading rule of the assignment: it compresses energy,
 # comfort and health (different units, different natures!) into a single
-# number. The example reward lives in Shizuku3Env (client/shizuku3gym.py)
-# and is intentionally simplistic. After the first training, open it,
-# criticize it, and improve it. Beware of reward hacking: the Agent will
-# exploit any loophole you leave.
+# number. YOU define it, in the marked block below, and pass it to the
+# environment. The given example is intentionally simplistic: train with
+# it, watch what the Agent learns, then criticize and improve it.
 #
 # Requirements (in addition to the client):
 #   pip install gymnasium stable-baselines3
@@ -25,7 +24,34 @@ from stable_baselines3 import PPO
 
 from shizuku3gym import Shizuku3Env
 
-TRAIN_STEPS = 20_000   # training budget (288 steps = 1 simulated day)
+TRAIN_STEPS = 1000   # training budget (288 steps = 1 simulated day)
+
+
+# =====================================================================
+# ====== DESIGN YOUR REWARD FUNCTION HERE =============================
+# The Agent maximizes THIS number -- nothing else. It will exploit any
+# loophole you leave (reward hacking). data keys:
+#   room_temp, room_rh, co2, outdoor_temp, occupants, ppd,
+#   energy_used [kWh in this interval], interval_h [h], time
+# Return (reward, terminated); terminated=True ends the episode.
+def my_reward(data):
+    reward = -data["energy_used"]                       # energy cost [kWh]
+    if 0 < data["occupants"]:
+        # ppd [%] x interval [h] = discomfort in [%h], so that the episode
+        # total equals -(energy [kWh] + PPD integral [%h]) -- the same
+        # quantities as the score table of examples 01-05.
+        reward -= data["ppd"] * data["interval_h"]
+    terminated = False
+    if 0 < data["occupants"] and 1000 < data["co2"]:
+        # Disqualification on a CO2 violation, as in the assignment.
+        # Question: is this penalty large enough that giving up is
+        # never cheaper than operating properly? Check what the Agent
+        # actually learns...
+        reward -= 100.0
+        terminated = True
+    return reward, terminated
+# ====== END OF YOUR REWARD FUNCTION ==================================
+# =====================================================================
 
 
 def evaluate(env, model=None):
@@ -50,7 +76,7 @@ def evaluate(env, model=None):
 
 
 def main():
-    env = Shizuku3Env()
+    env = Shizuku3Env(reward_function=my_reward)
 
     print(f"Training PPO for {TRAIN_STEPS} steps "
           f"(~{TRAIN_STEPS // env.max_steps} simulated days)...")

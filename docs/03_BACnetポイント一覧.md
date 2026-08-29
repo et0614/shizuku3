@@ -85,7 +85,7 @@ BACnetの慣習に従い、**Deviceオブジェクトの Local_Date / Local_Time
 
 | Inst. | Object_Name | Units | 説明 |
 |---|---|---|---|
-| 231 | IntegratedEnergy | kilowatt-hours | Q_cool/COP_c + Q_heat/COP_h + ファン電力 の積算 |
+| 231 | IntegratedEnergy | kilowatt-hours | Q_cool/COP_c + Q_heat/COP_h + ファン電力 + ポンプ電力 の積算(ポンプ電力は実水量に比例するため、空調機停止中でも弁が開いていれば計上される) |
 | 232 | IntegratedPPD | no-units(%·h) | 在室時PPDの時間積算 |
 | 233 | IntegratedOccupantWeightedPPD | no-units(人·%·h) | 在室時PPD×在室人数の時間積算(倫理的問いの討論素材。採点への採用可否はsetting.ini `PPD_OCCUPANT_WEIGHTED`をラッパーが参照) |
 | 234 | CO2ExcessTime | no-units(h) | 在室時にCO2>1,000 ppmだった時間の積算 |

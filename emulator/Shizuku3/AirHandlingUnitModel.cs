@@ -34,6 +34,12 @@ namespace Shizuku3
     /// <summary>温水コイル設計流量[L/min]</summary>
     public const double DESIGN_HW_FLOW = 25.9;
 
+    /// <summary>定格冷却能力[kW]</summary>
+    public const double DESIGN_COOLING_CAPACITY = 27.1;
+
+    /// <summary>定格加熱能力[kW]</summary>
+    public const double DESIGN_HEATING_CAPACITY = 14.5;
+
     /// <summary>冷温水弁のレンジアビリティ[-]</summary>
     public const double VALVE_RANGE_ABILITY = 50;
 
@@ -123,6 +129,9 @@ namespace Shizuku3
     /// <summary>ファン消費電力[kW]（給気+還気）</summary>
     public double FanElectricity { get; private set; }
 
+    /// <summary>ポンプ消費電力[kW]（定格水量時に定格能力/WTF。実際の熱交換量によらず水量に比例）</summary>
+    public double PumpElectricity { get; private set; }
+
     /// <summary>加湿器作動状態</summary>
     public bool HumidifierOn { get; private set; }
 
@@ -154,9 +163,9 @@ namespace Shizuku3
       //コイル（Shizuku1定格。簡略コンストラクタ: 面風速2.5m/s、乾湿境界RH95%、管内流速2.5m/s）
       double saMass = DESIGN_SA_FLOW * 1.2 / 3600;
       double hrt = MoistAir.GetHumidityRatioFromDryBulbTemperatureAndWetBulbTemperature(26.6, 19.3, 101.325);
-      cCoil = new CrossFinHeatExchanger(saMass, 2.5, 26.6, hrt, 95, DESIGN_CHW_FLOW / 60, 2.5, DESIGN_CHW_FLOW / 60, 7, 27.1);
+      cCoil = new CrossFinHeatExchanger(saMass, 2.5, 26.6, hrt, 95, DESIGN_CHW_FLOW / 60, 2.5, DESIGN_CHW_FLOW / 60, 7, DESIGN_COOLING_CAPACITY);
       hrt = MoistAir.GetHumidityRatioFromDryBulbTemperatureAndWetBulbTemperature(20.6, 14.2, 101.325);
-      hCoil = new CrossFinHeatExchanger(saMass, 2.5, 20.6, hrt, 95, DESIGN_HW_FLOW / 60, 2.5, DESIGN_HW_FLOW / 60, 44, 14.5);
+      hCoil = new CrossFinHeatExchanger(saMass, 2.5, 20.6, hrt, 95, DESIGN_HW_FLOW / 60, 2.5, DESIGN_HW_FLOW / 60, 44, DESIGN_HEATING_CAPACITY);
 
       //全熱交換器（効率0.76、全熱型、消費電力0.1kW）と加湿器（滴下浸透気化式、飽和効率0.9、水利用率0.5）
       rGen = new RotaryRegenerator(0.76, true, 0.1);
@@ -190,12 +199,38 @@ namespace Shizuku3
     public void Update(double roomTemperature, double roomHumidityRatio,
       double outdoorTemperature, double outdoorHumidityRatio)
     {
-      //停止時
+      //弁アクチュエータ: 一定速度で指令開度へ移動（全ストロークVALVE_TRAVEL_TIME秒のレート制限）
+      //空調機停止中も指令には追従する
+      double travel = Settings.Instance.ValveTravelTime;
+      double target = Math.Max(0, Math.Min(1, WaterValvePosition));
+      if (travel <= 0) ActualValvePosition = target;
+      else
+      {
+        double maxChange = TimeStep / travel;
+        double change = target - ActualValvePosition;
+        ActualValvePosition += Math.Abs(change) <= maxChange ? change : Math.Sign(change) * maxChange;
+      }
+
+      //弁開度→水量（イコールパーセント特性・定差圧・全閉可能）
+      double designWater = (IsCoolingMode ? DESIGN_CHW_FLOW : DESIGN_HW_FLOW) / 60; //[kg/s]
+      double minRate = 1 / VALVE_RANGE_ABILITY;
+      double flowRate = (Math.Pow(VALVE_RANGE_ABILITY, ActualValvePosition - 1) - minRate) / (1 - minRate); //開度0で流量0に正規化
+      double mWater = designWater * Math.Max(0, flowRate);
+      WaterFlowRate = mWater * 60;
+
+      //ポンプ電力: 定格水量時に定格能力/WTF、変流量時は流量比で減少（回転数制御相当）
+      //熱交換量ではなく水量に比例するため、空調機停止中でも弁が開いていれば電力を消費する
+      double designCapacity = IsCoolingMode ? DESIGN_COOLING_CAPACITY : DESIGN_HEATING_CAPACITY;
+      PumpElectricity = designCapacity / Settings.Instance.PumpWTF * (mWater / designWater);
+
+      double waterInTemp = IsCoolingMode ? ChilledWaterInletTemperature : HotWaterInletTemperature;
+
+      //停止時（空気側のみ停止。水は弁開度なりに流れ続ける）
       if (!IsOn)
       {
         SupplyAirMassFlowRate = SupplyAirVolumetricFlowRate = OAVolumetricFlowRate = 0;
-        WaterFlowRate = CoilLoad = FanElectricity = HumidifierWaterConsumption = 0;
-        WaterOutletTemperature = IsCoolingMode ? ChilledWaterInletTemperature : HotWaterInletTemperature;
+        CoilLoad = FanElectricity = HumidifierWaterConsumption = 0;
+        WaterOutletTemperature = waterInTemp; //空気が流れず熱交換なし
         SupplyAirTemperature = roomTemperature;
         SupplyAirHumidityRatio = roomHumidityRatio;
         HumidifierOn = false;
@@ -252,28 +287,9 @@ namespace Shizuku3
       //給気ファン（押込形: コイル・加湿器の上流に位置し、ファン発熱は混合空気に加わる）
       mixTemp += sFanElec / (mSA * cpAir);
 
-      //弁アクチュエータ: 一定速度で指令開度へ移動（全ストロークVALVE_TRAVEL_TIME秒のレート制限）
-      double travel = Settings.Instance.ValveTravelTime;
-      double target = Math.Max(0, Math.Min(1, WaterValvePosition));
-      if (travel <= 0) ActualValvePosition = target;
-      else
-      {
-        double maxChange = TimeStep / travel;
-        double change = target - ActualValvePosition;
-        ActualValvePosition += Math.Abs(change) <= maxChange ? change : Math.Sign(change) * maxChange;
-      }
-
-      //冷温水コイル（弁開度→水量: イコールパーセント特性・定差圧・全閉可能）**
-      double designWater = (IsCoolingMode ? DESIGN_CHW_FLOW : DESIGN_HW_FLOW) / 60; //[kg/s]
-      double lift = ActualValvePosition;
-      double minRate = 1 / VALVE_RANGE_ABILITY;
-      double flowRate = (Math.Pow(VALVE_RANGE_ABILITY, lift - 1) - minRate) / (1 - minRate); //開度0で流量0に正規化
-      double mWater = designWater * Math.Max(0, flowRate);
-      WaterFlowRate = mWater * 60;
-
+      //冷温水コイル**
       double coilOutTemp = mixTemp;
       double coilOutHumid = mixHumid;
-      double waterInTemp = IsCoolingMode ? ChilledWaterInletTemperature : HotWaterInletTemperature;
       WaterOutletTemperature = waterInTemp;
       CoilLoad = 0;
       if (1e-6 < mWater)

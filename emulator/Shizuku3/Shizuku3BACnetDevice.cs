@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO.BACnet;
 using System.IO.BACnet.Storage;
 using BaCSharp;
@@ -171,7 +171,8 @@ namespace Shizuku3
       double dv = 0; string sv = "";
       try { if (value.Count > 0) { sv = value[0].Value?.ToString() ?? ""; dv = Convert.ToDouble(value[0].Value, CultureInfo.InvariantCulture); } }
       catch { }
-      if (writableNames.TryGetValue(objectId.Instance, out string? wName))
+      if (Settings.Instance.LogBACnetWrites &&
+        writableNames.TryGetValue(objectId.Instance, out string? wName))
         Console.WriteLine($"[BACnet write] {wName}({objectId.Instance}) = {sv}");
 
       lock (svc.LockObj)
@@ -260,3 +261,4 @@ namespace Shizuku3
 
   }
 }
+

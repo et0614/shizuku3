@@ -14,3 +14,6 @@ __pycache__/
 naturalTemp.csv
 heatLoadTest.csv
 *.egg-info/
+
+# Trained RL models
+examples/*.zip

@@ -1,16 +1,18 @@
-﻿# Gymnasium environment for the Shizuku3 building emulator.
+# Gymnasium environment for the Shizuku3 building emulator.
 #
 # Wraps the BACnet client into the standard RL interface:
 #
-#   env = Shizuku3Env()
+#   env = Shizuku3Env(control_interval=15,
+#                     actions=["WaterValvePosition", "FanSpeedRatio"],
+#                     reward_function=my_reward)
 #   obs, info = env.reset()          # reinitialize the emulator (one episode = one day)
 #   obs, reward, terminated, truncated, info = env.step(action)
 #
-# The REWARD defined here is a deliberately simple example (energy +
-# comfort, with disqualification on a CO2 violation -- the same rule as
-# the free-optimization assignment). Designing the reward is the heart
-# of applying RL; treat this one as a starting point to criticize and
-# improve, not as the answer.
+# Both the ACTIONS and the REWARD are chosen by the caller: picking which
+# actuators the agent may touch, and designing the reward, are part of
+# the exercise. Actuators that are not chosen as actions are fixed to
+# sensible defaults (AHU on, mode by calendar, OA damper fully open so
+# that minimum ventilation is guaranteed, HEX bypass off, humidifier on).
 import math
 
 import gymnasium as gym
@@ -25,37 +27,73 @@ class Shizuku3Env(gym.Env):
 
     metadata = {"render_modes": []}
 
-    # ---- example reward parameters (modify and study the consequences!)
+    #: available actions: name -> function mapping the agent output [0..1]
+    #: to the written value (discrete devices are threshold-encoded)
+    ACTION_MAP = {
+        "WaterValvePosition": lambda a: float(a),
+        "FanSpeedRatio":      lambda a: 0.4 + 0.6 * float(a),  # inverter range
+        "OADamperPosition":   lambda a: float(a),
+        "AHUOnOff":           lambda a: 0.5 < a,
+        "OperationMode":      lambda a: 2 if 0.5 < a else 1,   # cooling / heating
+        "HEXBypass":          lambda a: 0.5 < a,
+        "HumidifierEnabled":  lambda a: 0.5 < a,
+    }
+
+    #: defaults written on reset for every actuator (actions overwrite
+    #: their own actuator on each step)
+    _DEFAULTS = {"AHUOnOff": True, "OperationMode": 0, "FanSpeedRatio": 1.0,
+                 "OADamperPosition": 1.0, "HEXBypass": False,
+                 "HumidifierEnabled": True}
+
+    # ---- example reward parameters (see default_reward)
     W_ENERGY = 1.0       # penalty per kWh consumed
     W_COMFORT = 1.0      # penalty per %h of PPD while occupied
-    CO2_LIMIT = 1000.0   # ppm; exceeding this while occupied ...
-    CO2_PENALTY = 100.0  # ... ends the episode with this penalty (disqualification)
+    CO2_LIMIT = 1000.0   # ppm
+    CO2_PENALTY = 100.0
 
     #: points read back from the emulator on every step
     _READS = ["RoomTemperature", "RoomRelativeHumidity", "RoomCO2Level",
-              "OutdoorTemperature", "OccupantCount", "RoomPPD", "IntegratedEnergy"]
+              "OutdoorTemperature", "OccupantCount", "RoomPPD", "RoomPMV",
+              "IntegratedEnergy"]
 
     def __init__(self, client=None, control_interval=5.0, episode_hours=24.0,
-                 full_actions=True):
+                 actions=None, reward_function=None):
         self.emu = client if client is not None else Shizuku3Client()
+        # reward_function(data) -> (reward, terminated). See default_reward
+        # for the expected signature.
+        self.reward_function = reward_function or Shizuku3Env.default_reward
         self.control_interval = control_interval
         self.max_steps = int(episode_hours * 60 / control_interval)
+
+        # Which actuators the agent controls (order = action vector order)
+        self.actions = list(actions) if actions is not None else \
+            ["WaterValvePosition", "FanSpeedRatio"]
+        for name in self.actions:
+            if name not in self.ACTION_MAP:
+                raise KeyError(f"Unknown action: {name} "
+                               f"(available: {list(self.ACTION_MAP)})")
 
         # Observation: [room temp, room RH, CO2, outdoor temp, occupants,
         #               sin(hour), cos(hour)] -- all scaled to roughly 0..1
         self.observation_space = spaces.Box(-1.0, 2.0, shape=(7,), dtype=np.float32)
-        # Action (all 0..1; discrete devices are threshold-encoded):
-        #   [0] water valve position
-        #   [1] fan speed (maps to 0.4..1.0)
-        #   [2] outdoor air damper position
-        # and, when full_actions=True (parity with the free assignment):
-        #   [3] AHU on/off        (on if 0.5 < a)
-        #   [4] operation mode    (cooling if a <= 0.5, heating otherwise)
-        #   [5] HEX bypass        (bypass if 0.5 < a)
-        #   [6] humidifier enable (enabled if 0.5 < a)
-        self.full_actions = full_actions
-        n_act = 7 if full_actions else 3
-        self.action_space = spaces.Box(0.0, 1.0, shape=(n_act,), dtype=np.float32)
+        self.action_space = spaces.Box(0.0, 1.0, shape=(len(self.actions),),
+                                       dtype=np.float32)
+
+    @staticmethod
+    def default_reward(data):
+        """Example reward: negative cost of the interval. data keys:
+        room_temp, room_rh, co2, outdoor_temp, occupants, ppd, pmv,
+        energy_used [kWh in this interval], interval_h [h], time.
+        Returns (reward, terminated). Designing this function is the
+        heart of the exercise -- supply your own via reward_function=."""
+        reward = -Shizuku3Env.W_ENERGY * data["energy_used"]
+        if 0 < data["occupants"]:
+            reward -= Shizuku3Env.W_COMFORT * data["ppd"] * data["interval_h"]
+        terminated = False
+        if 0 < data["occupants"] and Shizuku3Env.CO2_LIMIT < data["co2"]:
+            reward -= Shizuku3Env.CO2_PENALTY
+            terminated = True
+        return reward, terminated
 
     # ---- helpers -----------------------------------------------------
 
@@ -76,10 +114,8 @@ class Shizuku3Env(gym.Env):
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
         when = self.emu.reset()
-        if not self.full_actions:
-            # Reduced action set: fix the remaining devices to sane defaults
-            self.emu.write("AHUOnOff", True)
-            self.emu.write("OperationMode", 0)
+        for name, value in self._DEFAULTS.items():
+            self.emu.write(name, value)
         self.steps = 0
         self.prev_energy = 0.0
         obs = self._make_obs(self.emu.read("RoomTemperature"),
@@ -91,35 +127,20 @@ class Shizuku3Env(gym.Env):
 
     def step(self, action):
         a = np.clip(np.asarray(action, dtype=float), 0.0, 1.0)
-        writes = {
-            "WaterValvePosition": float(a[0]),
-            "FanSpeedRatio": 0.4 + 0.6 * float(a[1]),
-            "OADamperPosition": float(a[2]),
-        }
-        if self.full_actions:
-            writes["AHUOnOff"] = 0.5 < a[3]
-            writes["OperationMode"] = 2 if 0.5 < a[4] else 1
-            writes["HEXBypass"] = 0.5 < a[5]
-            writes["HumidifierEnabled"] = 0.5 < a[6]
+        writes = {name: self.ACTION_MAP[name](a[i])
+                  for i, name in enumerate(self.actions)}
         when, vals = self.emu.step_batch(minutes=self.control_interval,
                                          acceleration=FULL_SPEED,
                                          writes=writes, reads=self._READS)
-        rt, rh, co2, ot, occ, ppd, energy = vals
+        rt, rh, co2, ot, occ, ppd, pmv, energy = vals
         self.steps += 1
 
-        # ---- example reward: negative cost of this interval ------------
-        interval_h = self.control_interval / 60
         energy_used = energy - self.prev_energy
         self.prev_energy = energy
-        reward = -self.W_ENERGY * energy_used
-        if 0 < occ:
-            reward -= self.W_COMFORT * ppd * interval_h
-
-        terminated = False
-        if 0 < occ and self.CO2_LIMIT < co2:
-            # Health is a threshold, not a trade-off: disqualify the episode.
-            reward -= self.CO2_PENALTY
-            terminated = True
+        data = {"room_temp": rt, "room_rh": rh, "co2": co2, "outdoor_temp": ot,
+                "occupants": occ, "ppd": ppd, "pmv": pmv, "energy_used": energy_used,
+                "interval_h": self.control_interval / 60, "time": when}
+        reward, terminated = self.reward_function(data)
 
         truncated = self.max_steps <= self.steps
         obs = self._make_obs(rt, rh, co2, ot, occ, when)
@@ -129,5 +150,3 @@ class Shizuku3Env(gym.Env):
 
     def close(self):
         self.emu.close()
-
-

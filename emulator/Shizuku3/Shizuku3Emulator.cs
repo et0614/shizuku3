@@ -12,7 +12,7 @@ namespace Shizuku3
   /// ・外乱系統2: 執務者（HeatLoadModel内のOfficeTenant）
   /// ・外乱系統3: 冷温水入口温度のAR(1)（Ornstein-Uhlenbeck）過程
   /// ・初期化: 開始日前日を空調停止・Δt=3600sで収束するまで繰り返す周期定常計算（自然室温）
-  /// ・KPI: エネルギー（コイル熱量/COP+ファン電力）、在室時PPD積算（単純・人数重み）、CO2超過時間
+  /// ・KPI: エネルギー（コイル熱量/COP+ファン電力+ポンプ電力）、在室時PPD積算（単純・人数重み）、CO2超過時間
   /// 操作量はAHUプロパティ経由で外部（将来はBACnet層）から与える。
   /// </remarks>
   public class Shizuku3Emulator
@@ -210,7 +210,7 @@ namespace Shizuku3
     {
       double dtH = timeStep / 3600d;
       double cop = AHU.IsCoolingMode ? SYSTEM_COP_COOLING : SYSTEM_COP_HEATING;
-      IntegratedEnergy_kWh += (AHU.CoilLoad / cop + AHU.FanElectricity) * dtH;
+      IntegratedEnergy_kWh += (AHU.CoilLoad / cop + AHU.FanElectricity + AHU.PumpElectricity) * dtH;
 
       IReadOnlyZone zone = Load.Zone;
       double rh = MoistAir.GetRelativeHumidityFromDryBulbTemperatureAndHumidityRatio(
