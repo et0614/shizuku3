@@ -34,7 +34,7 @@ namespace Shizuku3
     {
       svc = service;
       Settings s = Settings.Instance;
-      DeviceStorage storage = DeviceStorage.Load(Path.Combine(AppContext.BaseDirectory, "DeviceStorage.xml"));
+      DeviceStorage storage = loadEmbeddedStorage();
       storage.DeviceId = s.DeviceID;
       comm = new BACnetCommunicator(storage, s.UdpPort, s.LocalEndpoint);
 
@@ -111,6 +111,15 @@ namespace Shizuku3
         props.Add(MakeProp(BacnetPropertyIds.PROP_UNITS, BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED, unit.Value.ToString()));
       comm.Storage.AddObject(new System.IO.BACnet.Storage.Object
       { Instance = instance, Type = type, Properties = props.ToArray() });
+    }
+
+    /// <summary>デバイスオブジェクトの雛形（DeviceStorage.xml）を埋め込みリソースから読み込む</summary>
+    private static DeviceStorage loadEmbeddedStorage()
+    {
+      System.Reflection.Assembly asm = typeof(Shizuku3BACnetDevice).Assembly;
+      string resName = asm.GetManifestResourceNames().First(n => n.EndsWith("DeviceStorage.xml"));
+      using Stream st = asm.GetManifestResourceStream(resName)!;
+      return (DeviceStorage)new System.Xml.Serialization.XmlSerializer(typeof(DeviceStorage)).Deserialize(st)!;
     }
 
     private void addAnalog(uint instance, string name, string desc, double value, ushort unit, bool writable)

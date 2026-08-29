@@ -7,7 +7,7 @@ name = "shizuku3client"
 version = "0.1.0"
 description = "Python client library for the Shizuku3 building emulator (BACnet)"
 requires-python = ">=3.10"
-dependencies = ["bacpypes3"]
+dependencies = ["bacpypes3", "matplotlib"]
 
 [project.optional-dependencies]
 rl = ["gymnasium", "stable-baselines3"]

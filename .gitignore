@@ -17,3 +17,6 @@ heatLoadTest.csv
 
 # Trained RL models
 examples/*.zip
+
+# Visual Studio publish profiles (local paths)
+**/Properties/PublishProfiles/

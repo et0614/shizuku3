@@ -16,9 +16,8 @@
     <None Update="setting.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DeviceStorage.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <!-- デバイスオブジェクトの雛形はexeに埋め込む（配布ファイルを減らすため） -->
+    <EmbeddedResource Include="DeviceStorage.xml" />
   </ItemGroup>
 
 </Project>
