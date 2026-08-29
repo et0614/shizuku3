@@ -1,4 +1,4 @@
-# Python client library for the Shizuku3 building emulator.
+﻿# Python client library for the Shizuku3 building emulator.
 #
 # Hides the BACnet (bacpypes3) details behind a small synchronous API:
 #
@@ -272,7 +272,7 @@ class Shizuku3Client:
                     return self._sim_time
             except Exception:
                 pass
-            time.sleep(1)
+            time.sleep(0.2)
         raise TimeoutError("Reinitialization did not complete (check the emulator)")
 
     def close(self):
@@ -292,3 +292,4 @@ if __name__ == "__main__":
     print("After 5 min step:", t, "/ Room temp [C]:", emu.read("RoomTemperature"))
     emu.close()
     print("OK")
+
