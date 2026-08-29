@@ -58,10 +58,15 @@ The BACnet server starts with acceleration 0 (paused). Simulation settings
 
 **2. Start the web GUI**
 
+Creating a virtual environment first is recommended (the `[rl]`/`[all]` extras
+pull in PyTorch via Stable-Baselines3, so isolation keeps your global
+site-packages clean):
+
 ```
-cd gui
-pip install -r requirements.txt
-python server.py
+python -m venv .venv
+.venv\Scripts\activate          (Windows; on Linux/macOS: source .venv/bin/activate)
+pip install -e "client[gui]"
+python gui/server.py
 ```
 
 A browser opens at `http://127.0.0.1:8000`. Press **Play** to start the clock.
@@ -77,6 +82,9 @@ Writing to `AnalogValue 301 (AccelerationRate)` starts the simulation.
 ```
 pip install -e client
 ```
+
+Optional extras: `client[gui]` (web GUI), `client[rl]` (Gymnasium + Stable-Baselines3
+for the reinforcement-learning examples), or everything at once: `pip install -e "client[all]"`.
 
 ```python
 from shizuku3client import Shizuku3Client

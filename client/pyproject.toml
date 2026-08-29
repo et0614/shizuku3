@@ -10,7 +10,10 @@ requires-python = ">=3.10"
 dependencies = ["bacpypes3", "matplotlib"]
 
 [project.optional-dependencies]
+gui = ["fastapi", "uvicorn[standard]"]
 rl = ["gymnasium", "stable-baselines3"]
+# Self-referencing extra: always the union of everything above.
+all = ["shizuku3client[gui,rl]"]
 
 [tool.setuptools]
 py-modules = ["shizuku3client", "shizuku3gym"]

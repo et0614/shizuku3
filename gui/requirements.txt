@@ -1,4 +1,0 @@
--e ../client
-fastapi
-uvicorn[standard]
-matplotlib
