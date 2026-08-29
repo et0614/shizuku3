@@ -40,12 +40,16 @@ def main():
     print("Resetting the emulator to the initial state...")
     start = emu.reset()
     print(f"Start: {start}")
+    now = start   # current simulated time, updated by every step() below
 
     log = {"time": [], "room": [], "co2": []}
     steps = int(SIMULATE_HOURS * 60 / CONTROL_INTERVAL)
     for i in range(steps):
 
         # --- 1. Measure: everything you can know -----------------------
+        # The clock is a sensor, too: "now" is a standard Python
+        # datetime.datetime, so now.hour (0-23), now.minute and
+        # now.weekday() (0=Mon .. 6=Sun) are all usable in your logic.
         room_temp = emu.read("RoomTemperature")            # [C]
         room_rh = emu.read("RoomRelativeHumidity")         # [%]
         room_co2 = emu.read("RoomCO2Level")                # [ppm]
@@ -77,6 +81,15 @@ def main():
         humidifier = True      # humidifier enabled            True / False
         humid_setpoint = 40.0  # humidification setpoint       [%RH]
         humid_deadband = 10.0  # humidification deadband       [+/- %RH]
+
+        # Example: time-scheduled operation (uncomment to try).
+        # Running the plant only while it is needed saves a lot of
+        # energy -- but start too late and the room is still hot at 9:00.
+        # if 7 <= now.hour < 20:
+        #     ahu_on = True
+        # else:
+        #     ahu_on = False
+        #     valve = 0.0    # a closed valve also stops the pump energy
 
         # ====== END OF YOUR CONTROL LOGIC ===============================
         # ================================================================

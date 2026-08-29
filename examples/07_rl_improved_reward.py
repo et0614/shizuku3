@@ -39,7 +39,10 @@ from stable_baselines3.common.callbacks import BaseCallback
 
 from shizuku3gym import Shizuku3Env
 
-TRAIN_STEPS = 96*100    # training budget for THIS run (96 steps = 1 day @15 min)
+TRAIN_STEPS = 96*200    # training budget for THIS run (96 steps = 1 day @15 min)
+                        # 200 days is enough: the reward jumps around day 100
+                        # (the agent discovers daytime-only operation) and
+                        # saturates by day ~150. Takes roughly half an hour.
 #TRAIN_STEPS = 0        # set 0 to skip training and only EVALUATE the saved model
 MODEL_PATH = "shizuku3_ppo2"
 RESUME = True          # continue from MODEL_PATH.zip if it exists
@@ -51,17 +54,20 @@ RESUME = True          # continue from MODEL_PATH.zip if it exists
 # ====== DESIGN YOUR REWARD FUNCTION HERE =============================
 # Design principle: give the agent a GRADIENT to climb. A flat penalty
 # ("10 whenever CO2 > 1000") tells the agent nothing about whether it is
-# getting closer; PPD saturates near 100 % in a hot room and goes flat
-# too. Both terms below stay proportional, so every small improvement
-# is rewarded:
-W_PMV = 2.0    # discomfort weight (|PMV| does not saturate, unlike PPD)
+# getting closer, and a saturating one (PPD flattens near 100 % in a hot
+# room) goes silent exactly where guidance is needed. Both terms below
+# stay proportional, so every small improvement is rewarded.
+# The comfort target is the same 26 C room setpoint as the PID examples
+# (01-04), so the learned policy can be compared with them directly.
+W_TMP = 2.0    # per K of room-temperature deviation from the setpoint
 W_CO2 = 0.01   # per ppm above the 1000 ppm health limit
+SETPOINT = 26.0
 
 
 def my_reward(data):
     reward = -data["energy_used"]                       # energy cost [kWh]
     if 0 < data["occupants"]:
-        reward -= W_PMV * abs(data["pmv"])              # discomfort
+        reward -= W_TMP * abs(data["room_temp"] - SETPOINT)  # comfort
         if 1000 < data["co2"]:
             reward -= W_CO2 * (data["co2"] - 1000)      # health (proportional)
     return reward, False
@@ -160,6 +166,8 @@ def main():
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(10, 8))
     ax1.plot(result["time"], result["room"], label="Room")
+    ax1.axhline(SETPOINT, color="gray", linestyle="--", linewidth=0.8,
+                label="Setpoint")
     ax1.set_ylabel("Temperature [C]")
     ax1.grid(alpha=0.3)
     ax1.legend()
