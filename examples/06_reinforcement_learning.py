@@ -13,8 +13,8 @@
 # environment. The given example is intentionally simplistic: train with
 # it, watch what the Agent learns, then criticize and improve it.
 #
-# Requirements (in addition to the client):
-#   pip install gymnasium stable-baselines3
+# Requirements:  pip install -e "client[rl]"
+#   (already installed if you set up with setup.bat / client[all])
 #
 # Before running: start the emulator (Shizuku3.exe). Training takes
 # roughly a minute per 1000 steps; start small and grow.

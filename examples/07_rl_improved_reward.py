@@ -26,7 +26,8 @@
 # and it is normal in real RL practice: the reward is shaped to make
 # learning possible; the final policy is judged by the original rule.
 #
-# Requirements:  pip install gymnasium stable-baselines3
+# Requirements:  pip install -e "client[rl]"
+#   (already installed if you set up with setup.bat / client[all])
 # Before running: start the emulator (Shizuku3.exe).
 # Training takes roughly a minute per 1000 steps.
 # =====================================================================

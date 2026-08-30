@@ -69,6 +69,9 @@ pip install -e "client[gui]"
 python gui/server.py
 ```
 
+On Windows the double-click helpers do the same: `setup.bat` (one-time venv +
+`client[all]` install), `start_gui.bat` (web GUI), `console.bat` (venv-activated prompt).
+
 A browser opens at `http://127.0.0.1:8000`. Press **Play** to start the clock.
 
 **3. Or use any BACnet client**

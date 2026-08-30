@@ -50,7 +50,8 @@ import matplotlib.pyplot as plt
 
 from shizuku3client import FULL_SPEED, Shizuku3Client
 
-KP = 1.6               # proportional gain [1/K]  <-- change me and re-run
+KP = 0.5               # proportional gain [1/K]  <-- change me and re-run
+#KP = 1.6              # ... with this gain, hunting starts (near KU)
 
 SETPOINT = 26.0        # room temperature setpoint [C]
 CONTROL_INTERVAL = 5   # control interval [min] (we can only act this often)
