@@ -31,6 +31,18 @@ namespace Shizuku3
     /// <summary>一時停止時刻（この時刻に達すると加速度が0になる）</summary>
     public DateTime? PauseAtDateTime { get; set; }
 
+    /// <summary>気象乱数シードのオーバーライド（null=setting.ini値。次のResetで反映）</summary>
+    public uint? WeatherSeedOverride { get; set; }
+
+    /// <summary>執務者乱数シードのオーバーライド（null=setting.ini値。次のResetで反映）</summary>
+    public uint? OccupantSeedOverride { get; set; }
+
+    /// <summary>冷温水温度乱数シードのオーバーライド（null=setting.ini値。次のResetで反映）</summary>
+    public uint? WaterTempSeedOverride { get; set; }
+
+    /// <summary>計算開始日のオーバーライド（null=setting.ini値。次のResetで反映）</summary>
+    public DateTime? StartDateOverride { get; set; }
+
     /// <summary>状態読み書きの排他用オブジェクト</summary>
     public object LockObj { get; } = new object();
 
@@ -88,11 +100,12 @@ namespace Shizuku3
       lock (LockObj) Emulator.ClearKPI();
     }
 
-    private static Shizuku3Emulator CreateEmulator()
+    private Shizuku3Emulator CreateEmulator()
     {
       Settings s = Settings.Instance;
-      return new Shizuku3Emulator(s.TimeStep, s.SimulationStartDate,
-        s.WeatherSeed, s.OccupantSeed, s.WaterTempSeed);
+      return new Shizuku3Emulator(s.TimeStep, StartDateOverride ?? s.SimulationStartDate,
+        WeatherSeedOverride ?? s.WeatherSeed, OccupantSeedOverride ?? s.OccupantSeed,
+        WaterTempSeedOverride ?? s.WaterTempSeed);
     }
 
     #endregion

@@ -23,6 +23,8 @@ namespace Shizuku3
       { 104, "AHUOnOff" }, { 105, "OperationMode" }, { 106, "HEXBypass" },
       { 107, "HumidifierEnabled" }, { 108, "HumiditySetPoint" }, { 109, "HumidityDeadband" },
       { 301, "AccelerationRate" }, { 302, "PauseAtDateTime" }, { 304, "Reinitialize" },
+      { 305, "WeatherSeed" }, { 306, "OccupantSeed" }, { 307, "WaterTempSeed" },
+      { 308, "SimulationStartDate" },
     };
 
     private readonly BACnetCommunicator comm;
@@ -78,6 +80,11 @@ namespace Shizuku3
         svc.PauseAtDateTime?.ToString("yyyy/MM/dd HH:mm:ss") ?? "");
       addString(303, "CurrentDateTime", "Current simulation time", "");
       addBinary(304, "Reinitialize", "Reinitialize (write active to reload setting.ini and restart)", false, true);
+      //乱数シード・開始日のオーバーライド（次のReinitializeで反映。汎化性能の検証用）
+      addAnalog(305, "WeatherSeed", "Weather random seed override (applied at next Reinitialize; 0 = use setting.ini)", 0, 95, true);
+      addAnalog(306, "OccupantSeed", "Occupant random seed override (applied at next Reinitialize; 0 = use setting.ini)", 0, 95, true);
+      addAnalog(307, "WaterTempSeed", "Water temperature random seed override (applied at next Reinitialize; 0 = use setting.ini)", 0, 95, true);
+      addString(308, "SimulationStartDate", "Start date override yyyy/MM/dd (applied at next Reinitialize; empty = use setting.ini)", "");
 
       storage.ChangeOfValue += onStorageChanged;
       //一時停止到達時は全ポイントを即時同期する（500ms周期の同期を待つと、
@@ -216,6 +223,14 @@ namespace Shizuku3
               svc.Reset();
               writeBinary(304, false);
             }
+            break;
+          case 305: svc.WeatherSeedOverride = dv <= 0 ? null : (uint)dv; break;
+          case 306: svc.OccupantSeedOverride = dv <= 0 ? null : (uint)dv; break;
+          case 307: svc.WaterTempSeedOverride = dv <= 0 ? null : (uint)dv; break;
+          case 308:
+            if (DateTime.TryParse(sv, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime sDate))
+              svc.StartDateOverride = sDate.Date;
+            else svc.StartDateOverride = null; //空文字・解釈不能はini値に戻す
             break;
         }
       }

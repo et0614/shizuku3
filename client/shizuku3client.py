@@ -60,6 +60,12 @@ _POINTS = {
     "PauseAtDateTime":         ("characterstring-value", 302, True),
     "CurrentDateTime":         ("characterstring-value", 303, False),
     "Reinitialize":            ("binary-value", 304, True),
+    # Randomness overrides, applied at the next Reinitialize
+    # (0 / empty string = use the setting.ini value)
+    "WeatherSeed":             ("analog-value", 305, True),
+    "OccupantSeed":            ("analog-value", 306, True),
+    "WaterTempSeed":           ("analog-value", 307, True),
+    "SimulationStartDate":     ("characterstring-value", 308, True),
 }
 
 # Japanese aliases (kept for backward compatibility with the web GUI etc.)
@@ -80,6 +86,8 @@ _ALIASES = {
     "CO2超過時間": "CO2ExcessTime", "在室時間": "OccupiedTime",
     "加速度": "AccelerationRate", "一時停止時刻": "PauseAtDateTime",
     "現在時刻": "CurrentDateTime", "リセット": "Reinitialize",
+    "気象シード": "WeatherSeed", "執務者シード": "OccupantSeed",
+    "冷温水シード": "WaterTempSeed", "開始日": "SimulationStartDate",
 }
 
 _TIME_FORMAT = "%Y/%m/%d %H:%M:%S"
@@ -259,9 +267,26 @@ class Shizuku3Client:
         self.write("AccelerationRate", 0)
         self._sim_time = None
 
-    def reset(self, timeout=90.0):
+    def reset(self, timeout=90.0, weather_seed=None, occupant_seed=None,
+              water_temp_seed=None, start_date=None):
         """Reload setting.ini, restart from the initial state and wait for
-        completion (takes ~10 s). Returns the simulation start time."""
+        completion (takes ~10 s). Returns the simulation start time.
+
+        The optional arguments override the random seeds and the start date
+        of setting.ini for this reset ("another day with the same statistics"
+        -- useful to test how well a controller generalizes). None restores
+        the setting.ini value, so a plain reset() always reproduces the
+        standard day. start_date accepts "yyyy/MM/dd" or a datetime/date."""
+        self.write("WeatherSeed", 0 if weather_seed is None else int(weather_seed))
+        self.write("OccupantSeed", 0 if occupant_seed is None else int(occupant_seed))
+        self.write("WaterTempSeed", 0 if water_temp_seed is None else int(water_temp_seed))
+        if start_date is None:
+            sd = ""
+        elif isinstance(start_date, str):
+            sd = start_date
+        else:
+            sd = start_date.strftime("%Y/%m/%d")
+        self.write("SimulationStartDate", sd)
         self.write("Reinitialize", True)
         limit = time.time() + timeout
         while time.time() < limit:

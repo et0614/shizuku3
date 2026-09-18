@@ -57,13 +57,19 @@ class Shizuku3Env(gym.Env):
               "IntegratedEnergy"]
 
     def __init__(self, client=None, control_interval=5.0, episode_hours=24.0,
-                 actions=None, reward_function=None):
+                 actions=None, reward_function=None, randomize_seeds=False):
         self.emu = client if client is not None else Shizuku3Client()
         # reward_function(data) -> (reward, terminated). See default_reward
         # for the expected signature.
         self.reward_function = reward_function or Shizuku3Env.default_reward
         self.control_interval = control_interval
         self.max_steps = int(episode_hours * 60 / control_interval)
+        # randomize_seeds=True: every episode is "another day with the same
+        # statistics" (fresh emulator seeds each reset). This forces the agent
+        # to actually use its sensors instead of memorizing the one fixed day
+        # -- essential when testing how well a policy generalizes. Call
+        # reset(seed=n) once first to make the sequence of days reproducible.
+        self.randomize_seeds = randomize_seeds
 
         # Which actuators the agent controls (order = action vector order)
         self.actions = list(actions) if actions is not None else \
@@ -112,8 +118,20 @@ class Shizuku3Env(gym.Env):
     # ---- Gymnasium API -----------------------------------------------
 
     def reset(self, seed=None, options=None):
+        """options may carry emulator overrides for this episode, e.g.
+        reset(options={"occupant_seed": 99, "weather_seed": 7,
+                       "start_date": "2026/1/21"})
+        -- "another day with the same statistics", for generalization
+        tests. Without options (and without randomize_seeds) the episode
+        is always the standard setting.ini day."""
         super().reset(seed=seed)
-        when = self.emu.reset()
+        opts = dict(options or {})
+        if self.randomize_seeds and not opts:
+            # Fresh emulator seeds drawn from the (seedable) episode RNG.
+            s = int(self.np_random.integers(1, 2**31 - 3))
+            opts = dict(weather_seed=s, occupant_seed=s + 1,
+                        water_temp_seed=s + 2)
+        when = self.emu.reset(**opts)
         for name, value in self._DEFAULTS.items():
             self.emu.write(name, value)
         self.steps = 0

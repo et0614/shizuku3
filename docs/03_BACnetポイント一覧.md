@@ -97,28 +97,28 @@ KPIの重み付け(総合スコア化)はラッパー・授業側で行う。KPI
 
 | Inst. | Object_Name | 型 | 説明 |
 |---|---|---|---|
-| 301 | AccelerationRate | AV | 加速度(実時間1秒あたりのシミュレーション秒数)。**0=停止**。起動時値はsetting.ini |
-| 302 | PauseAtDateTime | DateTime Value(書込可) | 一時停止時刻。書込み後に加速度>0とすると、本体がこの時刻ちょうどで自停止(加速度を0に)する。ステップ実行の基盤(Shizuku2と同方式) |
-| 303 | CurrentDateTime | DateTime Value(読取専用) | 現在のシミュレーション時刻(Device Local_Date/Timeの補助) |
+| 301 | AccelerationRate | AV(書込可) | 加速度(実時間1秒あたりのシミュレーション秒数)。**0=停止**。起動時値はsetting.ini |
+| 302 | PauseAtDateTime | CharacterString Value(書込可) | 一時停止時刻("yyyy/MM/dd HH:mm:ss")。書込み後に加速度>0とすると、本体がこの時刻ちょうどで自停止(加速度を0に)する。ステップ実行の基盤(Shizuku2と同方式) |
+| 303 | CurrentDateTime | CharacterString Value(読取専用) | 現在のシミュレーション時刻。リセット処理中は空文字(クライアントの完了検知用) |
+| 304 | Reinitialize | BV(書込可) | activeの書込みでsetting.iniを再読込し、助走計算からやり直して初期状態へ完全復帰(乱数系列もシードから再初期化)。RLのエピソードリセット用。完了すると本体がinactiveへ戻す(BACnet標準のReinitializeDeviceサービス対応は将来課題) |
+| 305 | WeatherSeed | AV(書込可) | 気象乱数シードのオーバーライド。**次のReinitializeで反映**。0=setting.ini値を使用 |
+| 306 | OccupantSeed | AV(書込可) | 執務者乱数シードのオーバーライド。次のReinitializeで反映。0=setting.ini値 |
+| 307 | WaterTempSeed | AV(書込可) | 冷温水温度乱数シードのオーバーライド。次のReinitializeで反映。0=setting.ini値 |
+| 308 | SimulationStartDate | CharacterString Value(書込可) | 計算開始日のオーバーライド("yyyy/MM/dd")。次のReinitializeで反映。空文字=setting.ini値 |
 
-### リセット — ReinitializeDeviceサービス
-
-独自ポイントではなく、BACnet標準の **ReinitializeDevice** サービスで実現する。
-
-| 引数 | 動作 |
-|---|---|
-| COLDSTART | setting.iniを再読込し、助走計算からやり直して初期状態へ完全復帰(乱数系列もシードから再初期化)。RLのエピソードリセット用 |
-| WARMSTART | KPI積算(231–234)のみクリア。状態・時刻は維持(採点区間の切替用) |
-
-COLDSTART時の助走計算(周期定常)を毎回実行すると重いため、**助走結果の初期状態は
-シード・開始日が不変ならキャッシュする**(2回目以降のリセットは即時完了)。
+305-308は「同じ統計的性質の別の1日」を外部から作るためのポイント。
+エピソード毎にシードを変えることで、固定された1日の暗記(開ループなスケジュール)
+ではなくセンサに応じた制御を学習させる=汎化性能の検証・向上に用いる
+(Pythonラッパーでは `emu.reset(weather_seed=..., start_date=...)` /
+`Shizuku3Env(randomize_seeds=True)` として公開)。
 
 ## 6. ラッパーAPIとの対応(参考)
 
 Pythonラッパー(Gymnasium互換)は上記を以下のように束ねる想定。
 
 ```python
-env.reset()        # → ReinitializeDevice(COLDSTART)、初期観測を返す
+env.reset()        # → 304(Reinitialize)へ書込み、初期観測を返す
+                   #   (randomize_seeds=Trueなら事前に305-307へシードを書込み)
 env.step(action)   # → 101-103等へ書込み(priority 16)
                    #   → 302に現在時刻+CONTROL_INTERVALを書込み
                    #   → 301に加速度を書込み → 自停止を待つ(303をポーリング or COV)
