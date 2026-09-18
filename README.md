@@ -43,51 +43,60 @@ docs/        Specifications (Japanese)
 
 ## Getting started
 
-Prerequisites: [.NET SDK 10](https://dotnet.microsoft.com/) and Python 3.10+
-(tested on Windows; the emulator itself has no Windows-specific dependencies).
+Prerequisite: Python 3.10+, installed with "Add python.exe to PATH" checked.
+The [release zip](https://github.com/et0614/shizuku3/releases) contains a
+self-contained `Shizuku3.exe`, so no .NET installation is needed; building the
+emulator from source additionally requires the
+[.NET SDK 10](https://dotnet.microsoft.com/).
 
-**1. Start the emulator**
+### Quick start (Windows)
+
+1. Download the latest [release](https://github.com/et0614/shizuku3/releases)
+   and unzip it anywhere.
+2. Double-click **`Shizuku3.exe`** — the BACnet server starts paused
+   (acceleration 0). Simulation settings (start date, time step, seeds,
+   COPs, ...) are in `setting.ini`.
+3. Double-click **`setup.bat`** — one time only. It creates a virtual
+   environment (`.venv`) and installs the Python packages
+   (downloads PyTorch; takes a while).
+4. Double-click **`start_gui.bat`** — a browser opens at
+   `http://127.0.0.1:8000`. Press **Play** to start the clock.
+5. To run the course examples, double-click **`console.bat`** and type e.g.
+   `python examples\01_onoff_control.py`.
+
+### What the helpers do (manual equivalent)
+
+The bat files only automate ordinary commands. On Linux/macOS — or if you
+prefer to see each step — run them yourself from the repository root:
+
+```
+python -m venv .venv             # setup.bat: create a virtual environment...
+.venv\Scripts\activate           #   (Linux/macOS: source .venv/bin/activate)
+pip install -e "client[all]"     #   ...and install the client + extras
+python gui/server.py             # start_gui.bat: start the web GUI
+```
+
+The virtual environment is recommended because the `[rl]`/`[all]` extras pull
+in PyTorch via Stable-Baselines3 — isolation keeps your global site-packages
+clean. Lighter installs: `client` (BACnet client only), `client[gui]` (web
+GUI), `client[rl]` (Gymnasium + Stable-Baselines3 for the RL examples).
+
+To run the emulator from source instead of the released exe:
 
 ```
 cd emulator
 dotnet run --project Shizuku3
 ```
 
-The BACnet server starts with acceleration 0 (paused). Simulation settings
-(start date, time step, seeds, COPs, ...) are in `emulator/Shizuku3/setting.ini`.
-
-**2. Start the web GUI**
-
-Creating a virtual environment first is recommended (the `[rl]`/`[all]` extras
-pull in PyTorch via Stable-Baselines3, so isolation keeps your global
-site-packages clean):
-
-```
-python -m venv .venv
-.venv\Scripts\activate          (Windows; on Linux/macOS: source .venv/bin/activate)
-pip install -e "client[gui]"
-python gui/server.py
-```
-
-On Windows the double-click helpers do the same: `setup.bat` (one-time venv +
-`client[all]` install), `start_gui.bat` (web GUI), `console.bat` (venv-activated prompt).
-
-A browser opens at `http://127.0.0.1:8000`. Press **Play** to start the clock.
-
-**3. Or use any BACnet client**
+### Or use any BACnet client
 
 The device (ID 3000) answers on the standard broadcast port 47808 and unicasts
 from the exclusive port 47809 (`127.0.0.1:47809` by default; see `setting.ini`).
 Writing to `AnalogValue 301 (AccelerationRate)` starts the simulation.
 
-**4. Or script it in Python**
+### Or script it in Python
 
-```
-pip install -e client
-```
-
-Optional extras: `client[gui]` (web GUI), `client[rl]` (Gymnasium + Stable-Baselines3
-for the reinforcement-learning examples), or everything at once: `pip install -e "client[all]"`.
+In the venv (`console.bat` opens one ready to use):
 
 ```python
 from shizuku3client import Shizuku3Client
