@@ -128,6 +128,7 @@ function connect() {
       for (const [id, v] of Object.entries(m.data))
         if (texts[id]) texts[id].textContent = v;
       playing = 0 < parseFloat(m.data.acc);
+      if (ppBusy <= Date.now()) setPlayButton(playing); //楽観的更新の窓中は上書きしない
       if (m.point) { addPoint(m.point); redraw(); }
     } else if (m.type === "error") {
       $("status").textContent = I18N[lang].err + m.message + I18N[lang].hint;
@@ -144,8 +145,22 @@ function send(obj) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj))
 const accVal = () => Math.max(1, Math.min(3600, Math.round(10 ** parseFloat($("acc").value))));
 $("acc").oninput = () => $("accv").textContent = accVal();
 $("acc").onchange = () => { if (playing) send({cmd: "play", value: accVal()}); };
-$("play").onclick = () => send({cmd: "play", value: accVal()});
-$("stop").onclick = () => send({cmd: "stop"});
+
+//再生/一時停止トグル: 表示は原則テレメトリ由来のplayingに従う
+//（一時停止時刻での自停止や外部スクリプトの書込みにも追従する）。
+//クリック直後だけは楽観的に反転し、サーバの確定を待つ間の連打を無視する。
+let ppBusy = 0;
+function setPlayButton(isPlaying) {
+  const b = $("playpause");
+  b.dataset.i18n = isPlaying ? "pause" : "play";
+  b.textContent = I18N[lang][b.dataset.i18n];
+}
+$("playpause").onclick = () => {
+  if (Date.now() < ppBusy) return;      //確定待ち中の連打を無視
+  ppBusy = Date.now() + 800;
+  send(playing ? {cmd: "stop"} : {cmd: "play", value: accVal()});
+  setPlayButton(!playing);              //楽観的更新（次のupdateで答え合わせ）
+};
 $("reset").onclick = () => { if (confirm(I18N[lang].confirm)) send({cmd: "reset"}); };
 const slider = (id, lbl, name, fmt) => {
   $(id).oninput = () => $(lbl).textContent = fmt(parseFloat($(id).value));
