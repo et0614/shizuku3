@@ -1,0 +1,5 @@
+# Shell scripts for macOS must keep LF line endings (CRLF breaks bash),
+# batch files keep CRLF for cmd.exe.
+*.command text eol=lf
+*.sh      text eol=lf
+*.bat     text eol=crlf

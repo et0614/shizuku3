@@ -43,11 +43,12 @@ docs/        Specifications (Japanese)
 
 ## Getting started
 
-Prerequisite: Python 3.10+, installed with "Add python.exe to PATH" checked.
-The [release zip](https://github.com/et0614/shizuku3/releases) contains a
-self-contained `Shizuku3.exe`, so no .NET installation is needed; building the
-emulator from source additionally requires the
-[.NET SDK 10](https://dotnet.microsoft.com/).
+Prerequisite: Python 3.10+ (on Windows, installed with "Add python.exe to PATH"
+checked). The [releases](https://github.com/et0614/shizuku3/releases) offer one
+zip per platform — `win-x64` (Windows) and `osx-arm64` (Apple Silicon Mac) —
+each containing a self-contained emulator (`Shizuku3.exe` / `Shizuku3`), so no
+.NET installation is needed; building the emulator from source additionally
+requires the [.NET SDK 10](https://dotnet.microsoft.com/).
 
 ### Quick start (Windows)
 
@@ -64,9 +65,26 @@ emulator from source additionally requires the
 5. To run the course examples, double-click **`console.bat`** and type e.g.
    `python examples\01_onoff_control.py`.
 
+### Quick start (macOS, Apple Silicon)
+
+1. Download the `osx-arm64` zip from the latest
+   [release](https://github.com/et0614/shizuku3/releases) and unzip it
+   anywhere (double-click the zip in Finder).
+2. Double-click **`setup.command`** — one time only. It also clears the
+   macOS download quarantine on the folder, so run it **before** the
+   emulator. If macOS refuses to open it ("unidentified developer"),
+   open *System Settings > Privacy & Security* and click **Open Anyway**
+   (or right-click the file > **Open**).
+3. Double-click **`Shizuku3`** — a Terminal window opens and the BACnet
+   server starts paused.
+4. Double-click **`start_gui.command`** — a browser opens at
+   `http://127.0.0.1:8000`. Press **Play** to start the clock.
+5. To run the course examples, double-click **`console.command`** and type
+   e.g. `python examples/01_onoff_control.py`.
+
 ### What the helpers do (manual equivalent)
 
-The bat files only automate ordinary commands. On Linux/macOS — or if you
+The bat/command files only automate ordinary commands. On Linux — or if you
 prefer to see each step — run them yourself from the repository root:
 
 ```
@@ -88,6 +106,16 @@ cd emulator
 dotnet run --project Shizuku3
 ```
 
+Releases are built by GitHub Actions (`.github/workflows/release.yml`):
+pushing a `v*` tag builds both zips, smoke-tests each on Windows and an
+Apple Silicon Mac, and creates a draft release to review and publish.
+
+```
+git tag v0.2.1 && git push origin v0.2.1
+```
+
+To build the zips locally instead (into `dist/`): `python tools/make_release.py 0.2.1`.
+
 ### Or use any BACnet client
 
 The device (ID 3000) answers on the standard broadcast port 47808 and unicasts
@@ -96,7 +124,7 @@ Writing to `AnalogValue 301 (AccelerationRate)` starts the simulation.
 
 ### Or script it in Python
 
-In the venv (`console.bat` opens one ready to use):
+In the venv (`console.bat` / `console.command` opens one ready to use):
 
 ```python
 from shizuku3client import Shizuku3Client
