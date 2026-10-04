@@ -71,7 +71,8 @@ jobs:
           else
             python -m zipfile -e "$zip" rel
           fi
-          echo "REL=$PWD/rel/shizuku3-v${{ needs.build.outputs.version }}" >> "$GITHUB_ENV"
+          # relative: Git Bash's $PWD (/d/a/...) is not a path Windows Python understands
+          echo "REL=./rel/shizuku3-v${{ needs.build.outputs.version }}" >> "$GITHUB_ENV"
       - name: Check executable bits (macOS)
         if: runner.os == 'macOS'
         run: test -x "$REL/Shizuku3" && test -x "$REL/setup.command"
