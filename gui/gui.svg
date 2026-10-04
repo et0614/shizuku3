@@ -23,39 +23,43 @@
         fill: none;
       }
 
-      .cls-7, .cls-9, .cls-10, .cls-11, .cls-13, .cls-14, .cls-15, .cls-16 {
+      .cls-7, .cls-8, .cls-10, .cls-11, .cls-12, .cls-14, .cls-15, .cls-16 {
         stroke-miterlimit: 10;
       }
 
-      .cls-7, .cls-9, .cls-11, .cls-13, .cls-15, .cls-16 {
+      .cls-7, .cls-8, .cls-10, .cls-12, .cls-15, .cls-16 {
         stroke-width: 8px;
+      }
+
+      .cls-8 {
+        stroke: url(#_名称未設定グラデーション_57);
       }
 
       .cls-3 {
         font-size: 48px;
       }
 
-      .cls-8 {
+      .cls-9 {
         stroke: #2962ff;
       }
 
-      .cls-8, .cls-12, .cls-14, .cls-17 {
+      .cls-9, .cls-13, .cls-14, .cls-17 {
         stroke-width: 6px;
       }
 
-      .cls-8, .cls-12, .cls-17 {
+      .cls-9, .cls-13, .cls-17 {
         stroke-linejoin: bevel;
       }
 
-      .cls-9 {
+      .cls-10 {
         stroke: #9575cd;
       }
 
-      .cls-10 {
+      .cls-11 {
         stroke-width: 5px;
       }
 
-      .cls-10, .cls-12, .cls-14, .cls-17 {
+      .cls-11, .cls-13, .cls-14, .cls-17 {
         stroke: #fff;
       }
 
@@ -63,16 +67,12 @@
         letter-spacing: -.06em;
       }
 
-      .cls-11 {
+      .cls-12 {
         stroke: #aab;
       }
 
       .cls-19 {
         fill: #4caf50;
-      }
-
-      .cls-13 {
-        stroke: url(#_名称未設定グラデーション_29);
       }
 
       .cls-20 {
@@ -111,81 +111,81 @@
         fill: #4fc3f7;
       }
     </style>
-    <linearGradient id="_名称未設定グラデーション_29" data-name="名称未設定グラデーション 29" x1="453.49" y1="461.04" x2="453.49" y2="752.58" gradientTransform="translate(0 -130.72)" gradientUnits="userSpaceOnUse">
+    <linearGradient id="_名称未設定グラデーション_57" data-name="名称未設定グラデーション 57" x1="619.17" y1="461.04" x2="619.17" y2="752.58" gradientTransform="translate(0 -130.72)" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#4caf50"/>
-      <stop offset="1" stop-color="#9575cd"/>
+      <stop offset="1" stop-color="#fbb03b"/>
     </linearGradient>
   </defs>
   <g id="background">
-    <rect class="cls-11" x="1253.4" y="126.54" width="300" height="611.66"/>
-    <rect class="cls-11" x="300.63" y="126.54" width="891.14" height="611.66"/>
+    <rect class="cls-12" x="1253.4" y="126.54" width="300" height="611.66"/>
+    <rect class="cls-12" x="300.63" y="126.54" width="891.14" height="611.66"/>
   </g>
   <g id="Fixed">
     <text class="cls-6" transform="translate(0 69.97)"><tspan x="0" y="0">Shizuku 3</tspan></text>
     <text class="cls-3" transform="translate(1268.6079 173.5566)"><tspan x="0" y="0">Room</tspan></text>
     <text class="cls-3" transform="translate(315.84 173.56)"><tspan x="0" y="0">Air handling unit</tspan></text>
     <text class="cls-2" transform="translate(350.37 392.51)"><tspan x="0" y="0">O</tspan><tspan class="cls-18" x="21.78" y="0">A</tspan></text>
-    <text class="cls-2" transform="translate(388.53 485.17)"><tspan x="0" y="0">R</tspan><tspan class="cls-18" x="20.22" y="0">A</tspan></text>
+    <text class="cls-2" transform="translate(644.77 485.17)"><tspan x="0" y="0">R</tspan><tspan class="cls-18" x="20.22" y="0">A</tspan></text>
     <text class="cls-2" transform="translate(348.3 578.97)"><tspan x="0" y="0">E</tspan><tspan class="cls-18" x="18.68" y="0">A</tspan></text>
     <text class="cls-3" transform="translate(31.04 243.93)"><tspan x="0" y="0">Outdoor</tspan></text>
     <g>
-      <line class="cls-16" x1="229.49" y1="330.44" x2="497.01" y2="330.44"/>
-      <polygon class="cls-19" points="491.18 350.38 525.71 330.44 491.18 310.49 491.18 350.38"/>
+      <line class="cls-16" x1="229.49" y1="330.44" x2="449.04" y2="330.44"/>
+      <polygon class="cls-19" points="443.2 350.38 477.74 330.44 443.2 310.49 443.2 350.38"/>
     </g>
     <g>
-      <line class="cls-15" x1="922.97" y1="621.87" x2="653.39" y2="621.87"/>
-      <polygon class="cls-20" points="659.22 601.92 624.69 621.86 659.22 641.81 659.22 601.92"/>
+      <line class="cls-15" x1="922.97" y1="621.87" x2="585.99" y2="621.87"/>
+      <polygon class="cls-20" points="591.82 601.92 557.29 621.86 591.82 641.81 591.82 601.92"/>
     </g>
     <g>
-      <line class="cls-9" x1="525.71" y1="621.75" x2="258.19" y2="621.75"/>
+      <line class="cls-10" x1="477.74" y1="621.75" x2="258.19" y2="621.75"/>
       <polygon class="cls-1" points="264.02 601.81 229.49 621.75 264.02 641.7 264.02 601.81"/>
     </g>
-    <circle class="cls-10" cx="367.74" cy="330.21" r="17.37"/>
-    <line class="cls-10" x1="385.11" y1="297.75" x2="350.37" y2="362.9"/>
-    <circle class="cls-10" cx="367.74" cy="621.75" r="17.37"/>
-    <line class="cls-10" x1="385.11" y1="589.3" x2="350.37" y2="654.44"/>
-    <line class="cls-13" x1="453.49" y1="330.32" x2="453.49" y2="621.87"/>
-    <rect class="cls-14" x="533.94" y="253.41" width="79.54" height="454.4"/>
-    <polygon class="cls-12" points="573.71 252.94 533.94 478.06 573.71 707.81 613.49 480.37 573.71 252.94"/>
+    <circle class="cls-11" cx="367.74" cy="330.21" r="17.37"/>
+    <line class="cls-11" x1="385.11" y1="297.75" x2="350.37" y2="362.9"/>
+    <circle class="cls-11" cx="367.74" cy="621.75" r="17.37"/>
+    <line class="cls-11" x1="385.11" y1="589.3" x2="350.37" y2="654.44"/>
+    <line class="cls-8" x1="619.17" y1="330.32" x2="619.17" y2="621.87"/>
+    <rect class="cls-14" x="477.74" y="253.41" width="79.54" height="454.4"/>
+    <polygon class="cls-13" points="517.51 252.94 477.74 478.06 517.51 707.81 557.29 480.37 517.51 252.94"/>
     <g>
-      <circle class="cls-12" cx="712.28" cy="330.32" r="57.14"/>
-      <circle class="cls-12" cx="712.28" cy="330.32" r="28.57"/>
-      <polyline class="cls-12" points="712.28 273.18 786.11 273.18 786.11 330.32 769.42 330.32"/>
+      <circle class="cls-13" cx="712.28" cy="330.32" r="57.14"/>
+      <circle class="cls-13" cx="712.28" cy="330.32" r="28.57"/>
+      <polyline class="cls-13" points="712.28 273.18 786.11 273.18 786.11 330.32 769.42 330.32"/>
     </g>
     <g>
-      <circle class="cls-12" cx="1004.34" cy="650.67" r="57.14"/>
-      <circle class="cls-12" cx="1004.34" cy="650.67" r="28.57"/>
-      <polyline class="cls-12" points="1004.34 593.52 930.51 593.52 930.51 650.67 947.2 650.67"/>
+      <circle class="cls-13" cx="1004.34" cy="650.67" r="57.14"/>
+      <circle class="cls-13" cx="1004.34" cy="650.67" r="28.57"/>
+      <polyline class="cls-13" points="1004.34 593.52 930.51 593.52 930.51 650.67 947.2 650.67"/>
     </g>
-    <line class="cls-16" x1="619.89" y1="330.32" x2="712.28" y2="330.32"/>
+    <line class="cls-16" x1="558.17" y1="330.32" x2="712.28" y2="330.32"/>
     <line class="cls-16" x1="792.69" y1="301.75" x2="817.37" y2="301.75"/>
     <line class="cls-7" x1="903.77" y1="301.75" x2="976.46" y2="301.75"/>
     <g>
       <line class="cls-7" x1="1028.83" y1="301.75" x2="1277.24" y2="301.75"/>
       <polygon class="cls-22" points="1271.4 321.7 1305.94 301.75 1271.4 281.81 1271.4 321.7"/>
     </g>
-    <rect class="cls-12" x="825.91" y="249.75" width="70.4" height="158.17"/>
-    <rect class="cls-12" x="985.04" y="249.75" width="35.2" height="158.17"/>
-    <line class="cls-12" x1="826.83" y1="249.75" x2="895.4" y2="407.92"/>
-    <circle class="cls-10" cx="452.66" cy="475.98" r="17.37"/>
-    <line class="cls-10" x1="470.03" y1="443.52" x2="435.29" y2="508.67"/>
+    <rect class="cls-13" x="825.91" y="249.75" width="70.4" height="158.17"/>
+    <rect class="cls-13" x="985.04" y="249.75" width="35.2" height="158.17"/>
+    <line class="cls-13" x1="826.83" y1="249.75" x2="895.4" y2="407.92"/>
+    <circle class="cls-11" cx="618.34" cy="475.98" r="17.37"/>
+    <line class="cls-11" x1="635.72" y1="443.52" x2="600.97" y2="508.67"/>
     <g>
-      <line class="cls-12" x1="1002.64" y1="273.18" x2="1002.64" y2="276.18"/>
+      <line class="cls-13" x1="1002.64" y1="273.18" x2="1002.64" y2="276.18"/>
       <line class="cls-17" x1="1002.64" y1="284.35" x2="1002.64" y2="380.38"/>
-      <line class="cls-12" x1="1002.64" y1="384.47" x2="1002.64" y2="387.47"/>
+      <line class="cls-13" x1="1002.64" y1="384.47" x2="1002.64" y2="387.47"/>
     </g>
-    <line class="cls-12" x1="861.11" y1="224.6" x2="861.11" y2="249.75"/>
-    <line class="cls-8" x1="880.16" y1="224.6" x2="913.6" y2="224.6"/>
-    <line class="cls-8" x1="842.06" y1="224.6" x2="815.09" y2="224.6"/>
+    <line class="cls-13" x1="861.11" y1="224.6" x2="861.11" y2="249.75"/>
+    <line class="cls-9" x1="880.16" y1="224.6" x2="913.6" y2="224.6"/>
+    <line class="cls-9" x1="842.06" y1="224.6" x2="815.09" y2="224.6"/>
     <line class="cls-15" x1="1291.89" y1="650.67" x2="1004.34" y2="650.67"/>
     <g>
-      <polygon class="cls-12" points="861.79 224.6 842.06 213.21 842.06 235.99 861.79 224.6"/>
-      <polygon class="cls-12" points="860.44 224.6 880.16 235.99 880.16 213.21 860.44 224.6"/>
+      <polygon class="cls-13" points="861.79 224.6 842.06 213.21 842.06 235.99 861.79 224.6"/>
+      <polygon class="cls-13" points="860.44 224.6 880.16 235.99 880.16 213.21 860.44 224.6"/>
     </g>
     <text class="cls-5" transform="translate(165.08 315.09)"><tspan x="0" y="0">°C</tspan></text>
     <text class="cls-5" transform="translate(172.53 367.65)"><tspan x="0" y="0">%</tspan></text>
-    <text class="cls-5" transform="translate(409.1 245.68)"><tspan x="0" y="0">%</tspan></text>
-    <text class="cls-5" transform="translate(409.1 288.81)"><tspan x="0" y="0">CMH</tspan></text>
+    <text class="cls-5" transform="translate(389.03 245.68)"><tspan x="0" y="0">%</tspan></text>
+    <text class="cls-5" transform="translate(389.03 288.81)"><tspan x="0" y="0">CMH</tspan></text>
     <text class="cls-5" transform="translate(729.43 425.16)"><tspan x="0" y="0">kW</tspan></text>
     <text class="cls-5" transform="translate(720.47 256.49)"><tspan x="0" y="0">%</tspan></text>
     <text class="cls-5" transform="translate(813.29 165.84)"><tspan x="0" y="0">%</tspan></text>
@@ -213,13 +213,13 @@
     <text class="cls-5" transform="translate(122.27 367.65)"><tspan x="0" y="0">58</tspan></text>
   </g>
   <g id="damper_pos">
-    <text class="cls-5" transform="translate(366.49 245.68)"><tspan x="0" y="0">58</tspan></text>
+    <text class="cls-5" transform="translate(346.41 245.68)"><tspan x="0" y="0">58</tspan></text>
   </g>
   <g id="oa_flow">
-    <text class="cls-5" transform="translate(348.69 288.81)"><tspan x="0" y="0">500</tspan></text>
+    <text class="cls-5" transform="translate(328.62 288.81)"><tspan x="0" y="0">500</tspan></text>
   </g>
   <g id="hex_state">
-    <text class="cls-5" transform="translate(632.43 508.83)"><tspan x="0" y="0">Enabled</tspan></text>
+    <text class="cls-5" transform="translate(349.67 479.86)"><tspan x="0" y="0">Enabled</tspan></text>
   </g>
   <g id="humid_state">
     <text class="cls-5" transform="translate(978.26 233.92)"><tspan x="0" y="0">Enabled</tspan></text>
